@@ -22,7 +22,6 @@ int main() {
   reset(10);
   
   while(1) {
-  reset(10);
     nvboard_update();
     single_cycle();
   }
