@@ -1,7 +1,7 @@
 # rules for NVBoard
 include $(NVBOARD_HOME)/scripts/nvboard.mk
 #exe name
-TOPNAME = top
+TOPNAME = light
 NXDC_FILES = constr/top.nxdc
 # constraint file
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
