@@ -5,8 +5,7 @@ TOPNAME = top
 NXDC_FILES = constr/top.nxdc
 # constraint file
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
-$(SRC_AUTO_BIND): $(NXDC_FILES)
-	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
+
 # project source
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
@@ -45,3 +44,6 @@ sim: $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 clean:
 	rm -rf $(BUILD_DIR)
 include ../Makefile
+
+$(SRC_AUTO_BIND): $(NXDC_FILES)
+	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
