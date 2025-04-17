@@ -30,6 +30,8 @@ CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 
 $(shell mkdir -p $(BUILD_DIR))
 
+$(SRC_AUTO_BIND): $(NXDC_FILES)
+	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 all:
 	@echo "Write this Makefile by your self."
@@ -45,5 +47,4 @@ clean:
 	rm -rf $(BUILD_DIR)
 include ../Makefile
 
-#$(SRC_AUTO_BIND): $(NXDC_FILES)
-#	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
+
