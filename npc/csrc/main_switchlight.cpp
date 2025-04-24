@@ -16,7 +16,7 @@ static void reset(int n) {
   dut.rst = 0;
 }
 
-int main() {
+int main_switchlight() {
   nvboard_bind_all_pins(&dut);
   nvboard_init();
   reset(10000);
