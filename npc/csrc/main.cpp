@@ -85,7 +85,6 @@ static void reset(int n) {
 int main() {
   nvboard_bind_all_pins(&mux41);
   nvboard_init();
-  reset(10000);
   
   while(1) {
     nvboard_update();
