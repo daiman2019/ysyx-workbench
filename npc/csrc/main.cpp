@@ -33,10 +33,10 @@ void sim_exit()
 }
 void sim_run()
 {
-    top->key=0;step_and_dump_wave();
-    top->key=1;step_and_dump_wave();
-    top->key=2;step_and_dump_wave();
-    top->key=3;step_and_dump_wave();
+    top->Y=0;step_and_dump_wave();
+    top->Y=1;step_and_dump_wave();
+    top->Y=2;step_and_dump_wave();
+    top->Y=3;step_and_dump_wave();
 }
 
 int main()
