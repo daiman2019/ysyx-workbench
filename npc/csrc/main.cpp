@@ -76,11 +76,11 @@ void single_cycle() {
   mux41.clk = 1; dut.eval();
 }
 
-static void reset(int n) {
+/*static void reset(int n) {
   mux41.rst = 1;
   while (n -- > 0) single_cycle();
   mux41.rst = 0;
-}
+}*/
 
 int main() {
   nvboard_bind_all_pins(&mux41);
