@@ -3,6 +3,8 @@ include $(NVBOARD_HOME)/scripts/nvboard.mk
 #exe name
 TOPNAME = mux41
 NXDC_FILES = constr/top.nxdc
+
+BUILD_DIR = ./build
 # constraint file
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
 
@@ -12,7 +14,7 @@ CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*
 CSRCS += $(SRC_AUTO_BIND)
 
 #build dir verilator_obj_dir and exe path
-BUILD_DIR = ./build
+
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
@@ -45,6 +47,6 @@ sim: $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 	        --Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 clean:
 	rm -rf $(BUILD_DIR)
-include ../Makefile
+include ../../Makefile
 
 
