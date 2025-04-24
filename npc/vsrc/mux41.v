@@ -8,6 +8,7 @@ MuxKeyWithDefault #(4,2,1) mux_2bits(
     .lut         	({2'b00,X[0],2'b01,X[1],2'b10,X[2],2'b11,X[3]})
 );
 endmodule
+
 module MuxKeyInternal #(NR_KEY = 2, KEY_LEN = 1, DATA_LEN = 1, HAS_DEFAULT = 0) (
   output reg [DATA_LEN-1:0] out,
   input [KEY_LEN-1:0] key,
