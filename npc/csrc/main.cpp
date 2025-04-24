@@ -1,11 +1,52 @@
+#include <verilated.h>
 #include <nvboard.h>
-#include <Vlight.h>
+#include <Vmux41.h>
+#include <verilated_vcd_c.h> //vcd waveform trace
 
-static TOP_NAME dut;
+VerilatedContext* contextp=NULL;
+VerilatedVcdC* tfp = NULL;
+static Vmux41* top;
 
-void nvboard_bind_all_pins(TOP_NAME* light);
+void nvboard_bind_all_pins(TOP_NAME* mux41);
 
-void single_cycle() {
+void step_and_dump_wave()
+{
+    top->eval();
+    contextp->timeInc(1);
+    tfp->dump(contextp->time());
+}
+
+void sim_init()
+{
+    contextp = new VerilatedContext;
+    tfp = new VerilatedVcdC;
+    top = new Vmux41;
+    contextp->traceEverOn(true);
+    top->trace(tfp,0);
+    tfp->open("mux41_waveform.vcd");//.vcd
+}
+
+void sim_exit()
+{
+    step_and_dump_wave();
+    tfp->close();
+}
+void sim_run()
+{
+    top->key=0;step_and_dump_wave();
+    top->key=1;step_and_dump_wave();
+    top->key=2;step_and_dump_wave();
+    top->key=3;step_and_dump_wave();
+}
+
+int main()
+{
+    sim_init();
+    sim_run();
+    sim_exit();
+    return 0;
+}
+/*void single_cycle() {
   dut.clk = 0; dut.eval();
   dut.clk = 1; dut.eval();
 }
@@ -27,4 +68,4 @@ int main() {
   }
   nvboard_quit();
   return 0;
-}
+}*/
