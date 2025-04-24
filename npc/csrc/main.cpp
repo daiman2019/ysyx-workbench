@@ -6,7 +6,7 @@
 VerilatedContext* contextp=NULL;
 VerilatedVcdC* tfp = NULL;
 static Vmux41* top;
-
+static TOP_NAME mux41;
 void nvboard_bind_all_pins(TOP_NAME* mux41);
 
 void step_and_dump_wave()
@@ -38,21 +38,25 @@ void sim_run()
     top->Y=0;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=0;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
     top->Y=0;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    
     top->Y=1;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=1;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=1;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=1;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
     top->Y=1;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    
     top->Y=2;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=2;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=2;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=2;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
     top->Y=2;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    
     top->Y=3;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=3;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=3;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=3;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
     top->Y=3;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    
     top->Y=4;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=4;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=4;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
@@ -60,22 +64,22 @@ void sim_run()
     top->Y=4;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
 }
 
-int main()
+/*int main() //for verilator to check vcd waveform
 {
     sim_init();
     sim_run();
     sim_exit();
     return 0;
-}
-/*void single_cycle() {
-  dut.clk = 0; dut.eval();
-  dut.clk = 1; dut.eval();
+}*/
+void single_cycle() {
+  mux41.clk = 0; dut.eval();
+  mux41.clk = 1; dut.eval();
 }
 
 static void reset(int n) {
-  dut.rst = 1;
+  mux41.rst = 1;
   while (n -- > 0) single_cycle();
-  dut.rst = 0;
+  mux41.rst = 0;
 }
 
 int main() {
@@ -89,4 +93,4 @@ int main() {
   }
   nvboard_quit();
   return 0;
-}*/
+}
