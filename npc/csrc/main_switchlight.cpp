@@ -1,4 +1,4 @@
-#include <nvboard.h>
+/*#include <nvboard.h>
 #include <Vlight.h>
 
 static TOP_NAME dut;
@@ -16,7 +16,7 @@ static void reset(int n) {
   dut.rst = 0;
 }
 
-int main_switchlight() {
+int main() {
   nvboard_bind_all_pins(&dut);
   nvboard_init();
   reset(10000);
@@ -27,4 +27,4 @@ int main_switchlight() {
   }
   nvboard_quit();
   return 0;
-}
+}*/
