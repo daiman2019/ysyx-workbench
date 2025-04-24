@@ -1,9 +1,9 @@
 #include <nvboard.h>
 #include <Vlight.h>
 
-static TOP_NAME dut;
+static TOP_NAME dut;//TOP_NAME=Vlight
 
-void nvboard_bind_all_pins(TOP_NAME* light);
+void nvboard_bind_all_pins(TOP_NAME* name);
 
 void single_cycle() {
   dut.clk = 0; dut.eval();
