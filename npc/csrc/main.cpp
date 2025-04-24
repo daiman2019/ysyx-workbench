@@ -33,10 +33,31 @@ void sim_exit()
 }
 void sim_run()
 {
-    top->Y=0;step_and_dump_wave();
-    top->Y=1;step_and_dump_wave();
-    top->Y=2;step_and_dump_wave();
-    top->Y=3;step_and_dump_wave();
+    top->Y=0;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=0;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=0;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=0;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
+    top->Y=0;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    top->Y=1;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=1;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=1;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=1;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
+    top->Y=1;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    top->Y=2;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=2;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=2;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=2;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
+    top->Y=2;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    top->Y=3;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=3;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=3;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=3;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
+    top->Y=3;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
+    top->Y=4;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=4;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=4;top->X0=0;top->X1=1;top->X2=0;top->X3=0;step_and_dump_wave();
+    top->Y=4;top->X0=0;top->X1=0;top->X2=1;top->X3=0;step_and_dump_wave();
+    top->Y=4;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
 }
 
 int main()
