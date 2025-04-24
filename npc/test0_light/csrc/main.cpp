@@ -1,4 +1,4 @@
-/*#include <nvboard.h>
+#include <nvboard.h>
 #include <Vlight.h>
 
 static TOP_NAME dut;
@@ -27,4 +27,4 @@ int main() {
   }
   nvboard_quit();
   return 0;
-}*/
+}
