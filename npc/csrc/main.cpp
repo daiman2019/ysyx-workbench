@@ -71,12 +71,13 @@ void sim_run()
     sim_exit();
     return 0;
 }*/
-void single_cycle() {
+
+/*void single_cycle() {
   mux41.clk = 0; dut.eval();
   mux41.clk = 1; dut.eval();
 }
 
-/*static void reset(int n) {
+static void reset(int n) {
   mux41.rst = 1;
   while (n -- > 0) single_cycle();
   mux41.rst = 0;
@@ -88,7 +89,7 @@ int main() {
   
   while(1) {
     nvboard_update();
-    single_cycle();
+    mux41.eval();
   }
   nvboard_quit();
   return 0;
