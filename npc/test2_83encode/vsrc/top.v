@@ -9,7 +9,7 @@ module top(input [7:0] x,
      .y(y),
      .input_flag(input_flag)); // instantiation of encode83 module
 
-    data2seg decoder(.data({1'b0,y}),.neg_show(1'b1),.hout(hout));
+    data2seg decoder(.data({1'b0,y}),.neg_show(1'b0),.hout(hout));
 
 
 endmodule
