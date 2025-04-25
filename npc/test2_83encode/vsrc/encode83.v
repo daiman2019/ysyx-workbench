@@ -3,7 +3,7 @@ input ena,
 output reg [2:0] y,
 output input_flag);
 
-    assign input_flag = ~(x==8'b0);
+    assign input_flag = ~(x==8'b0) && ena;
     always@(*) begin
         if(ena) begin
             casez(x)
