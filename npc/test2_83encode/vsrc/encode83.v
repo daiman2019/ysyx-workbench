@@ -15,7 +15,7 @@ always@(*) begin
         8'b0000001z:y=3'd1;
         8'b00000001:y=3'd0;
         default:y=3'bxxx;
-    encase
+    endcasez
     end
     else begin
         y=3'b000;
