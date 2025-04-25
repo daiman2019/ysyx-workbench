@@ -31,7 +31,7 @@ void sim_exit()
     step_and_dump_wave();
     tfp->close();
 }
-void sim_run()
+/*void sim_run()
 {
     top->Y=0;top->X0=0;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
     top->Y=0;top->X0=1;top->X1=0;top->X2=0;top->X3=0;step_and_dump_wave();
@@ -64,7 +64,7 @@ void sim_run()
     top->Y=4;top->X0=0;top->X1=0;top->X2=0;top->X3=1;step_and_dump_wave();
 }
 
-/*int main() //for verilator to check vcd waveform
+int main() //for verilator to check vcd waveform
 {
     sim_init();
     sim_run();
