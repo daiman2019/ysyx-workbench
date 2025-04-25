@@ -1,6 +1,6 @@
 module encode83(input [7:0] x,
 input ena,
-output [2:0] y,
+output reg [2:0] y,
 output input_flag);
 
     assign input_flag = ~(x==8'b0);
