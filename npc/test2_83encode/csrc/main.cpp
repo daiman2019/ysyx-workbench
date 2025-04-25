@@ -6,7 +6,7 @@
 VerilatedContext* contextp=NULL;
 VerilatedVcdC* tfp = NULL;
 static Vtop* top;
-static TOP_NAME top;
+static TOP_NAME dut;
 void nvboard_bind_all_pins(TOP_NAME* name);
 
 void step_and_dump_wave()
@@ -74,12 +74,12 @@ int main() //for verilator to check vcd waveform
 
 int main() // for nvboard test
 {
-  nvboard_bind_all_pins(&top);
+  nvboard_bind_all_pins(&dut);
   nvboard_init();
   
   while(1) {
     nvboard_update();
-    top.eval();
+    dut.eval();
   }
   nvboard_quit();
   return 0;
