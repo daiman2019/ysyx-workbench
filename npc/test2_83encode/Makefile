@@ -19,7 +19,7 @@ OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
 #verilate_flags
-VERILATOR_FLAGS =  --cc -MMD --build --trace
+VERILATOR_FLAGS = --cc -MMD --build --trace -Wno-CASEX
 
 #nvboard flags link flags in nvboard.mk
 LDFLAGS +=-lSDL2 -lSDL2_image
