@@ -9,9 +9,8 @@ module alu_signed_4bits(
     output reg overflow,
     output reg zero_flag);
 
-    reg [3:0] temp=4'b0000;
-
     always @(*) begin
+        reg [3:0] temp=4'b0000;
         result = 4'b0000;carry_out = 0;overflow = 0;zero_flag = 0;equal_flag = 0;less_flag = 0;
         case (opt) 
             3'b000: begin // ADD
