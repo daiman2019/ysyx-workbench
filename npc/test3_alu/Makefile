@@ -20,7 +20,7 @@ BIN = $(BUILD_DIR)/$(TOPNAME)
 
 #verilate_flags
 VERILATOR_FLAGS = --cc -MMD --build --trace \
-                  -O3 --x-assign fast --x-initial fast --noassert --nowwarn
+                  -O3 --x-assign fast --x-initial fast --noassert --Wno-fatal
 # -Wno-CASEX 禁用casex警告
 # --lint-only模式快速验证修改效果，lint静态分析和代码检查工具
 #  -Wall打开所有warning
