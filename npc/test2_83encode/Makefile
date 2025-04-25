@@ -1,7 +1,7 @@
 # rules for NVBoard
 include $(NVBOARD_HOME)/scripts/nvboard.mk
 #exe name
-TOPNAME = encode83
+TOPNAME = top
 NXDC_FILES = constr/top.nxdc
 
 BUILD_DIR = ./build

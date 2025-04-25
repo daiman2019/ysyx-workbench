@@ -1,12 +1,12 @@
 #include <verilated.h>
 #include <nvboard.h>
-#include <Vencode83.h>
+#include <Vtop.h>
 #include <verilated_vcd_c.h> //vcd waveform trace
 
 VerilatedContext* contextp=NULL;
 VerilatedVcdC* tfp = NULL;
-static Vencode83* top;
-static TOP_NAME encode83;
+static Vtop* top;
+static TOP_NAME top;
 void nvboard_bind_all_pins(TOP_NAME* name);
 
 void step_and_dump_wave()
@@ -20,7 +20,7 @@ void sim_init()
 {
     contextp = new VerilatedContext;
     tfp = new VerilatedVcdC;
-    top = new Vencode83;
+    top = new Vtop;
     contextp->traceEverOn(true);
     top->trace(tfp,0);
     tfp->open("mux41_waveform.vcd");//.vcd
@@ -74,12 +74,12 @@ int main() //for verilator to check vcd waveform
 
 int main() // for nvboard test
 {
-  nvboard_bind_all_pins(&encode83);
+  nvboard_bind_all_pins(&top);
   nvboard_init();
   
   while(1) {
     nvboard_update();
-    encode83.eval();
+    top.eval();
   }
   nvboard_quit();
   return 0;
