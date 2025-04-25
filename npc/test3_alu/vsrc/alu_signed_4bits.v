@@ -12,12 +12,7 @@ module alu_signed_4bits(
     reg [3:0] temp;
 
     always @(*) begin
-        result = 4'b0000;
-        carry_out = 0;
-        overflow = 0;
-        zero_flag = 0;
-        equal_flag = 0;
-        less_flag = 0;
+        result = 4'b0000;carry_out = 0;overflow = 0;zero_flag = 0;equal_flag = 0;less_flag = 0;
         case (opt) 
             3'b000: begin // ADD
                 {carry_out, result} = A + B;
@@ -59,12 +54,9 @@ module alu_signed_4bits(
                 equal_flag = ~(|result);
             end
             default: begin
-                result = 4'b0000;
-                carry_out = 0;
-                overflow = 0;
-                zero_flag = 0;
-                equal_flag = 0;
-                less_flag = 0;
+                result = 4'b0000;carry_out = 0;
+                overflow = 0;zero_flag = 0;
+                equal_flag = 0;less_flag = 0;
             end
         endcase
     end
