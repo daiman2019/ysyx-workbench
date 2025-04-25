@@ -9,11 +9,11 @@ module alu_signed_4bits(
     output reg overflow,
     output reg zero_flag);
 
-    wire cin,ctemp; // 0:add 1:sub
+    wire cin; // 0:add 1:sub
     wire [3:0] temp;
     assign cin = (opt==3'b110 || opt==3'b111 || opt==3'b001)?1'b1:1'b0;
     assign temp = ({4{cin}}^B);
-    assign {ctemp,carry_out, result} = A + temp + cin;
+    assign {carry_out, result} = A + temp + cin;
     assign overflow =(A[3]==temp[3]) &&(A[3]!=result[3]);
     assign zero_flag = ~(|result);
     assign less_flag = (opt==3'b110)?(overflow ^ result[3]):1'b0;
