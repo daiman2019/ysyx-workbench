@@ -23,3 +23,4 @@ module data2seg(input[3:0] data,input neg_show,output [6:0] hout);
     end
     assign hout = neg_show ? h : ~h; //共阴极，输入为1对应数码管显示；若为共阳极，则对H取反
 endmodule
+
