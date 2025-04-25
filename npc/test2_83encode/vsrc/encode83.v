@@ -6,8 +6,8 @@ output input_flag);
     assign input_flag = ~(x==8'b0) && ena;
     always@(*) begin
         if(ena) begin
-            casex(x)
-        	8'b1zzzzzzz:y=3'd7;
+            casez(x)
+        	8'b1???????:y=3'd7;
         	8'b01zzzzzz:y=3'd6;
         	8'b001zzzzz:y=3'd5;
         	8'b0001zzzz:y=3'd4;
