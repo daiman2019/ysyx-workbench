@@ -20,10 +20,11 @@ BIN = $(BUILD_DIR)/$(TOPNAME)
 
 #verilate_flags
 VERILATOR_FLAGS = --cc -MMD --build --trace \
-                  -O3 --x-assign fast --x-initial fast --noassert --Wno-fatal
+                  -O3 --x-assign fast --x-initial fast --noassert 
 # -Wno-CASEX 禁用casex警告
 # --lint-only模式快速验证修改效果，lint静态分析和代码检查工具
 #  -Wall打开所有warning
+# --Wno-fatal将致命warning降级为普通警告，允许编译继续
 
 #nvboard flags link flags in nvboard.mk
 LDFLAGS +=-lSDL2 -lSDL2_image
