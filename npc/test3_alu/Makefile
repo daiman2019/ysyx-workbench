@@ -19,9 +19,10 @@ OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
 #verilate_flags
-VERILATOR_FLAGS = -Wall --cc -MMD --build --trace 
+VERILATOR_FLAGS = --cc -MMD --build --trace 
 # -Wno-CASEX 禁用casex警告
 # --lint-only模式快速验证修改效果，lint静态分析和代码检查工具
+#  -Wall打开所有warning
 
 #nvboard flags link flags in nvboard.mk
 LDFLAGS +=-lSDL2 -lSDL2_image
