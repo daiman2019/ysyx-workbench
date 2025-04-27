@@ -12,11 +12,11 @@ module top(
     .lfsr_out(lfsr_out));
 
     data2seg show_low(.data(lfsr_out[3:0]),
-    .neg_show(1'b1),
+    .neg_show(1'b0),
     .hout(hout[6:0]));
 
     data2seg show_high(.data(lfsr_out[7:4]),
-    .neg_show(1'b1),
+    .neg_show(1'b0),
     .hout(hout[13:7]));
 
 endmodule
