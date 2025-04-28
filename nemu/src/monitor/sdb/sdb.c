@@ -54,6 +54,15 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+/*static int cmd_si(char *args) {
+  execute(atoi(args));
+  return 0;
+}
+static int cmd_info(char *args) {
+  execute(atoi(args));
+  return 0;
+}*/
+
 static struct {
   const char *name;
   const char *description;
@@ -63,7 +72,10 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
 
-  /* TODO: Add more commands */
+  /* Add more commands */
+//  { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
+// { "info", "print the information of registers or watchpoints", cmd_info },
+ // { "x", "examine memory", cmd_x }
 
 };
 
