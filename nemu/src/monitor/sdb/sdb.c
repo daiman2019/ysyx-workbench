@@ -78,7 +78,6 @@ static int cmd_info(char *args) {
 
 static int cmd_x(char *args) {
   printf("x: %s\n", args);
-  vaddr_t example;
   if (args == NULL) {
     return -1;
   }
@@ -90,8 +89,9 @@ static int cmd_x(char *args) {
   int n = atoi(value_numbers);
   uint32_t address = (uint32_t)strtoul(expr,NULL,16);
   printf("n:%d,expr:%s,%08x\n", n, expr,address);
-  example = vaddr_read(address, n);
-  printf("vaddr_out,%08x\n", example);
+  for(int i = 0; i < n; i++) {
+    printf("addr is %08x , value is %08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
+  }
   return 0;
 }
 
