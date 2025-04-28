@@ -57,11 +57,10 @@ static int cmd_help(char *args);
 
 static int cmd_si(char *args) {
   printf("si: %s\n", args);
-  if (args == NULL) {
+  if (args == NULL) 
     cpu_exec(1);
-    return 0;
-  }
-  cpu_exec(atoi(args));
+  else
+    cpu_exec(atoi(args));
   return 0;
 }
 
@@ -88,7 +87,6 @@ static int cmd_x(char *args) {
   }
   int n = atoi(value_numbers);
   uint32_t address = (uint32_t)strtoul(expr,NULL,16);
-  printf("n:%d,expr:%s,%08x\n", n, expr,address);
   for(int i = 0; i < n; i++) {
     printf("addr is %08x , value is %08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
   }
