@@ -88,7 +88,7 @@ static int cmd_x(char *args) {
     return -1;
   }
   int n = atoi(value_numbers);
-  int address = atoi(expr);
+  uint32_t address = atoi(expr);
   printf("n:%d,expr:%s,%08x\n", n, expr,address);
   example = vaddr_read(address, n);
   printf("vaddr_out,%08x\n", example);
