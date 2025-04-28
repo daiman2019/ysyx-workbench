@@ -73,6 +73,27 @@ static int cmd_info(char *args) {
   return 0;
 }
 
+static int cmd_x(char *args) {
+  printf("x: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  char *value_numbers = strtok(args, " ");
+  char *expr = strtok(NULL, " ");
+  if (value_numbers == NULL || expr == NULL) {
+    return -1;
+  }
+  //int n = atoi(value_numbers);
+  int address = atoi(expr);
+  int* pointer = NULL;
+  printf("address:0x%08x,size is %ld\n", address,sizeof(address));
+  printf("pointer:0x%p,size is %ld\n", pointer,sizeof(pointer));
+  // for(int i=0;i<n;i++){
+  //   printf("addr:0x%p,value:0x%08x.\n",pointer+i*4,*(pointer+i*4));
+  // }
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -85,7 +106,7 @@ static struct {
   /* Add more commands */
   { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
   { "info", "print the information of registers or watchpoints", cmd_info },
- // { "x", "examine memory", cmd_x }
+  { "x", "examine memory and print the value",cmd_x }
 
 };
 
