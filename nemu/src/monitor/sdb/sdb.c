@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/vaddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -86,13 +87,9 @@ static int cmd_x(char *args) {
     return -1;
   }
   int n = atoi(value_numbers);
-  printf("n:%d,expr:%s\n", n, expr);
   unsigned long address = strtol(expr,NULL,16);
-  uint32_t* pointer = (void*) address;
-  printf("addr:%p,value:%08x\n", pointer, *pointer);
-  for(int i=0;i<n;i++){
-    printf("addr:0x%p,value:0x%08x.\n",pointer+i*4,*(pointer+i*4));
-  }
+  printf("n:%d,expr:%s,%ld\n", n, expr,address);
+  vaddr_read(address, n);
   return 0;
 }
 
