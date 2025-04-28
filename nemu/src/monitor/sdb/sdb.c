@@ -60,7 +60,9 @@ static int cmd_si(char *args) {
   if (args == NULL) 
     cpu_exec(1);
   else
+    {printf("si: %d\n", atoi(args));
     cpu_exec(atoi(args));
+    }
   return 0;
 }
 
