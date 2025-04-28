@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/vaddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -54,6 +55,44 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args) {
+  printf("si: %s\n", args);
+  if (args == NULL) 
+    cpu_exec(1);
+  else
+    cpu_exec(atoi(args));
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  printf("info: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  if(strcmp(args, "r") == 0) {
+    isa_reg_display();
+  }
+  return 0;
+}
+
+static int cmd_x(char *args) {
+  printf("x: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  char *value_numbers = strtok(args, " ");
+  char *expr = strtok(NULL, " ");
+  if (value_numbers == NULL || expr == NULL) {
+    return -1;
+  }
+  int n = atoi(value_numbers);
+  uint32_t address = (uint32_t)strtoul(expr,NULL,16);
+  for(int i = 0; i < n; i++) {
+    printf("addr is %08x , value is %08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
+  }
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -63,7 +102,10 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
 
-  /* TODO: Add more commands */
+  /* Add more commands */
+  { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
+  { "info", "print the information of registers or watchpoints", cmd_info },
+  { "x", "examine memory and print the value",cmd_x }
 
 };
 

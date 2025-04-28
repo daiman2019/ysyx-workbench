@@ -24,6 +24,12 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+    int i=0;
+    for(i=0;i<32;i++)
+    {
+        printf("%s:hex is %08x(dec is %u)\n",reg_name(i),gpr(i),gpr(i));
+    }
+    
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
