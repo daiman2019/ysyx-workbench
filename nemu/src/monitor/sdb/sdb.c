@@ -63,10 +63,15 @@ static int cmd_si(char *args) {
   cpu_exec(atoi(args));
   return 0;
 }
-/*static int cmd_info(char *args) {
-  execute(atoi(args));
+
+static int cmd_info(char *args) {
+  printf("info: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  isa_reg_display();//info r
   return 0;
-}*/
+}
 
 static struct {
   const char *name;
@@ -79,7 +84,7 @@ static struct {
 
   /* Add more commands */
   { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
-// { "info", "print the information of registers or watchpoints", cmd_info },
+  { "info", "print the information of registers or watchpoints", cmd_info },
  // { "x", "examine memory", cmd_x }
 
 };
