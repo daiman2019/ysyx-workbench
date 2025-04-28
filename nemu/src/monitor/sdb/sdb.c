@@ -54,11 +54,16 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
-/*static int cmd_si(char *args) {
-  execute(atoi(args));
+static int cmd_si(char *args) {
+  printf("si: %s\n", args);
+  if (args == NULL) {
+    cpu_exec(1);
+    return 0;
+  }
+  cpu_exec(atoi(args));
   return 0;
 }
-static int cmd_info(char *args) {
+/*static int cmd_info(char *args) {
   execute(atoi(args));
   return 0;
 }*/
@@ -73,7 +78,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* Add more commands */
-//  { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
+  { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
 // { "info", "print the information of registers or watchpoints", cmd_info },
  // { "x", "examine memory", cmd_x }
 
