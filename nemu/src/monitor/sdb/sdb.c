@@ -83,14 +83,12 @@ static int cmd_x(char *args) {
   if (value_numbers == NULL || expr == NULL) {
     return -1;
   }
-  //int n = atoi(value_numbers);
+  int n = atoi(value_numbers);
   unsigned long address = strtol(expr,NULL,16);
-  void* pointer = (void*) address;
-  printf("address:0x%08lx,size is %ld\n", address,sizeof(address));
-  printf("pointer:0x%p,size is %ld\n", pointer,sizeof(pointer));
-  // for(int i=0;i<n;i++){
-  //   printf("addr:0x%p,value:0x%08x.\n",pointer+i*4,*(pointer+i*4));
-  // }
+  uint32_t* pointer = (void*) address;
+  for(int i=0;i<n;i++){
+    printf("addr:0x%p,value:0x%08x.\n",pointer+i*4,*(pointer+i*4));
+  }
   return 0;
 }
 
