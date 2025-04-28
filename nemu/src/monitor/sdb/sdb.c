@@ -84,9 +84,9 @@ static int cmd_x(char *args) {
     return -1;
   }
   //int n = atoi(value_numbers);
-  int address = atoi(expr);
-  int* pointer = NULL;
-  printf("address:0x%08x,size is %ld\n", address,sizeof(address));
+  unsigned long address = strtol(expr,NULL,16);
+  void* pointer = (void*) address;
+  printf("address:0x%08lx,size is %ld\n", address,sizeof(address));
   printf("pointer:0x%p,size is %ld\n", pointer,sizeof(pointer));
   // for(int i=0;i<n;i++){
   //   printf("addr:0x%p,value:0x%08x.\n",pointer+i*4,*(pointer+i*4));
