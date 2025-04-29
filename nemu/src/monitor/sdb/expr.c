@@ -214,7 +214,7 @@ word_t eval(int p, int q) //p and q are the start and end index of tokens
       case '+': return val1 + val2;
       case '-': return val1 - val2;
       case '*': return val1 * val2;
-      case '/': return val1 / val2;
+      case '/': return (sword_t)val1 / (sword_t)val2;
       default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
      }
     }
@@ -297,3 +297,5 @@ word_t expr(char *e, bool *success) {
   return eval(0, nr_token-1);
 
 }
+
+
