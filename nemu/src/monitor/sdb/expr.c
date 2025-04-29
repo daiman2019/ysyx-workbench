@@ -250,17 +250,15 @@ int check_parentheses(int p,int q) //check if there are matched parentheses
     if (tokens[i].type == '(')
     {
       state++;
+      max = state > max ? state : max;
     }
     else if (tokens[i].type == ')')
     {
       state--;
       if(state<0)
       {
+        printf("state=%d,max=%d\n",state,max);
         return 2; //stop to calculate
-      }
-      else
-      {
-        max = state > max ? state : max;
       }
     }
   }
