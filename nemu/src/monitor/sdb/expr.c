@@ -179,9 +179,14 @@ int eval(int p, int q) //p and q are the start and end index of tokens
   {
     return atoi(tokens[p].str);
   }
-  else if (check_parentheses(p, q)) //check if there are parentheses
+  else if (check_parentheses(p, q)==0) //check if there are parentheses
   {
     return eval(p+1,q-1);
+  }
+  else if (check_parentheses(p, q)==2)
+  {
+    printf("wrong parentheses\n");
+    assert(0);
   }
   else
   {
@@ -239,13 +244,29 @@ int find_main_operator(int p, int q) //find the main operator
 }
 int check_parentheses(int p,int q) //check if there are matched parentheses
 {
+  int state=0;
   if (tokens[p].type == '(' && tokens[q].type == ')')
   {
-    return 1;
+    return 0;// matched
   }
   else
   {
-    return 0;
+    for(int i=p;i<=q;i++)
+    {
+      if (tokens[i].type == '(')
+      {
+        state++;
+      }
+      else if (tokens[i].type == ')')
+      {
+        state--;
+        if(state<0)
+        {
+          return 2; //stop to calculate
+        }
+      }
+    }
+    return 1;
   }
 }
 
