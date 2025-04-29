@@ -244,30 +244,27 @@ int find_main_operator(int p, int q) //find the main operator
 }
 int check_parentheses(int p,int q) //check if there are matched parentheses
 {
-  int state=0;
-  if (tokens[p].type == '(' && tokens[q].type == ')')
+  int state=0,max=0;
+  for(int i=p;i<=q;i++)
   {
-    return 0;// matched
-  }
-  else
-  {
-    for(int i=p;i<=q;i++)
+    if (tokens[i].type == '(')
     {
-      if (tokens[i].type == '(')
+      state++;
+    }
+    else if (tokens[i].type == ')')
+    {
+      state--;
+      if(state<0)
       {
-        state++;
+        return 2; //stop to calculate
       }
-      else if (tokens[i].type == ')')
+      else
       {
-        state--;
-        if(state<0)
-        {
-          return 2; //stop to calculate
-        }
+        max = state > max ? state : max;
       }
     }
-    return 1;
   }
+  return (state==0)&&(max==1);
 }
 
 
