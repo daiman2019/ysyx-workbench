@@ -208,3 +208,31 @@ void init_sdb() {
   /* Initialize the watchpoint pool. */
   init_wp_pool();
 }
+
+void test_expr()
+{
+    FILE *fp = fopen("home/Documents/dm/ysyx_gitcode/ysyx-workbench/nemu/tools/gen-expr/input", "r");
+    assert(fp != NULL);
+
+    char* e=NULL;
+    bool success;
+    uint32_t correct_result,result;
+    size_t len;
+    ssize_t read;
+    while(1)
+    {
+      if(fscanf(fp,"%u",&correct_result)==-1) break;
+      read = getline(&e, &len, fp);
+      if (read == -1) break;
+      e[read-1] = '\0';
+      result = expr(e, &success);
+      if(success)
+      {
+        printf("result = %d,correct_result = %d\n",result,correct_result);
+        assert(result == correct_result);
+      }
+    }
+    fclose(fp);
+    free(e);
+}
+

@@ -30,8 +30,9 @@ static char *code_format =
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
-int pos = 0;
-static void gen(char c) {
+int pos;
+static void gen(char c) 
+{
   if(pos >= sizeof(buf) - 1) {
     fprintf(stderr, "Buffer overflow\n");
     exit(1);
@@ -53,7 +54,7 @@ static void gen_rand_op() {
 }
 static void gen_num()
 {
-  gen('0' + choose(10));
+  gen('1' + choose(9));
 }
 static void gen_rand_expr() {
   switch(choose(3))
@@ -73,6 +74,7 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    pos = 0;
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
@@ -82,7 +84,7 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc /tmp/.code.c -Wall -Werror -o /tmp/.expr");
     if (ret != 0) continue;
 
     fp = popen("/tmp/.expr", "r");
@@ -96,3 +98,6 @@ int main(int argc, char *argv[]) {
   }
   return 0;
 }
+
+
+
