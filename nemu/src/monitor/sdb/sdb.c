@@ -105,6 +105,7 @@ static int cmd_p(char *args) {
     return -1;
   }
   result = expr(exprarg, success);
+  printf("result = %d\n",result);
   if (*success==true) {
     printf("result = %d\n",result);
     return -1;
