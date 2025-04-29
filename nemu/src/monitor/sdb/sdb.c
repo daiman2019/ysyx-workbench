@@ -93,6 +93,26 @@ static int cmd_x(char *args) {
   return 0;
 }
 
+static int cmd_p(char *args) {
+  printf("p: %s\n", args);
+  bool *success = NULL;
+  uint32_t result = 0;
+  if (args == NULL) {
+    return -1;
+  }
+  char *exprarg = strtok(args, " ");
+  if (exprarg == NULL) {
+    return -1;
+  }
+  result = expr(exprarg, success);
+  if (*success==true) {
+    printf("result = %d\n",result);
+    return -1;
+  }
+  return *success;
+}
+
+
 static struct {
   const char *name;
   const char *description;
@@ -105,7 +125,12 @@ static struct {
   /* Add more commands */
   { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
   { "info", "print the information of registers or watchpoints", cmd_info },
-  { "x", "examine memory and print the value",cmd_x }
+  { "x", "examine memory and print the value",cmd_x },
+  { "p", "evaluate the expression", cmd_p },
+ // { "w", "set watchpoint", cmd_w },
+ // { "d", "delete watchpoint", cmd_d },
+
+  { NULL, NULL, NULL }
 
 };
 
