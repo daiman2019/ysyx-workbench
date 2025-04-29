@@ -233,5 +233,6 @@ void test_expr()
     }
     fclose(fp);
     free(e);
+    printf("test expr success\n");
 }
 
