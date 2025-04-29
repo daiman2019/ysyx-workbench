@@ -95,7 +95,7 @@ static int cmd_x(char *args) {
 
 static int cmd_p(char *args) {
   printf("p: %s\n", args);
-  bool *success = NULL;
+  bool success;
   uint32_t result = 0;
   if (args == NULL) {
     return -1;
@@ -104,9 +104,9 @@ static int cmd_p(char *args) {
   if (exprarg == NULL) {
     return -1;
   }
-  result = expr(exprarg, success);
+  result = expr(exprarg, &success);
   printf("result = %d\n",result);
-  if (*success) {
+  if (success) {
     printf("result = %d\n",result);
     return -1;
   }
