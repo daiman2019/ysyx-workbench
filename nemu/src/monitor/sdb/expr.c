@@ -253,6 +253,7 @@ word_t expr(char *e, bool *success) {
 
   /* Insert codes to evaluate the expression. */
   *success = 1;
-  return eval(0, strlen(e)-1);
+  printf("nr_token: %d",nr_token);
+  return eval(0, nr_token);
 
 }
