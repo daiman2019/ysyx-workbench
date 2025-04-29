@@ -171,6 +171,7 @@ static bool make_token(char *e) {
 int eval(int p, int q) //p and q are the start and end index of tokens
 {
   int state = 0;
+  int val1=0,val2=0;
   if (p > q) //wrong position
   {
     printf("p > q\n");
@@ -204,8 +205,8 @@ int eval(int p, int q) //p and q are the start and end index of tokens
         assert(0);
       }
 
-      int val1 = eval(p, op - 1);
-      int val2 = eval(op + 1, q);
+      val1 = eval(p, op - 1);
+      val2 = eval(op + 1, q);
     
       printf("val1 = %d, val2 = %d\n", val1, val2);
     
@@ -267,7 +268,6 @@ int check_parentheses(int p,int q) //check if there are matched parentheses
       state--;
       if(state<0)
       {
-        printf("state=%d,max=%d\n",state,num);
         return 2; //stop to calculate
       }
       num = state==0?num+1:num;
