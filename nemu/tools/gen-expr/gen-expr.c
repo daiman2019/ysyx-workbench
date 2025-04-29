@@ -54,14 +54,26 @@ static void gen_rand_op() {
 }
 static void gen_num()
 {
-  gen('1' + choose(9));
+  gen('0' + choose(10));
 }
-static void gen_rand_expr() {
+
+static void gen_space()
+{
+  int i = choose(3);
+  for(int j=0;j<i;j++)
+    gen(' ');
+}
+
+static void gen_rand_expr(int depth) {
+  if (depth == 0) {
+    gen_num();
+    return;
+  }
   switch(choose(3))
   {
-    case 0:gen_num();break;
-    case 1: gen('(');gen_rand_expr();gen(')');break;
-    default:gen_rand_expr();gen_rand_op();gen_rand_expr();break;
+    case 0:gen_num();gen_space();break;
+    case 1: gen('(');gen_rand_expr(depth-1);gen(')');break;
+    default:gen_rand_expr(depth-1);gen_rand_op();gen_rand_expr(depth-1);break;
   }
 }
 
@@ -75,7 +87,7 @@ int main(int argc, char *argv[]) {
   int i;
   for (i = 0; i < loop; i ++) {
     pos = 0;
-    gen_rand_expr();
+    gen_rand_expr(100);
 
     sprintf(code_buf, code_format, buf);
 
