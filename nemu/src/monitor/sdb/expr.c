@@ -193,7 +193,9 @@ int eval(int p, int q) //p and q are the start and end index of tokens
     }
     int val1 = eval(p, op - 1);
     int val2 = eval(op + 1, q);
-
+    printf ("op = %d,p=%d\n", op,p);
+    printf("val1 = %d, val2 = %d\n", val1, val2);
+    printf("wrong main operater:%c\n",tokens[op].type);
     switch (tokens[op].type) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
@@ -252,8 +254,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* Insert codes to evaluate the expression. */
-  *success = 1;
-  printf("nr_token: %d",nr_token);
+  *success = true;
   return eval(0, nr_token-1);
 
 }
