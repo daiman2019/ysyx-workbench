@@ -170,6 +170,7 @@ static bool make_token(char *e) {
 
 int eval(int p, int q) //p and q are the start and end index of tokens
 {
+  int state = 0;
   if (p > q) //wrong position
   {
     printf("p > q\n");
@@ -179,15 +180,19 @@ int eval(int p, int q) //p and q are the start and end index of tokens
   {
     return atoi(tokens[p].str);
   }
-  else if (check_parentheses(p, q)==0) //check if there are parentheses
+  else
   {
-    return eval(p+1,q-1);
-  }
-  else if (check_parentheses(p, q)==2)
-  {
-    printf("wrong parentheses\n");
-    assert(0);
-  }
+    state = check_parentheses(p, q);
+    if(state==2) 
+    {
+      printf("wrong parentheses\n");
+      assert(0);
+    }
+    else if(state==0)
+    {
+      return eval(p+1,q-1);
+    }
+  
   else
   {
     int op = find_main_operator(p, q);
@@ -211,6 +216,7 @@ int eval(int p, int q) //p and q are the start and end index of tokens
       case '/': return val1 / val2;
       default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
      }
+    }
   }
 }
 int find_main_operator(int p, int q) //find the main operator
@@ -244,25 +250,25 @@ int find_main_operator(int p, int q) //find the main operator
 }
 int check_parentheses(int p,int q) //check if there are matched parentheses
 {
-  int state=0,max=0;
+  int state=0,num=0;
   for(int i=p;i<=q;i++)
   {
     if (tokens[i].type == '(')
     {
       state++;
-      max = state > max ? state : max;
     }
     else if (tokens[i].type == ')')
     {
       state--;
       if(state<0)
       {
-        printf("state=%d,max=%d\n",state,max);
+        printf("state=%d,max=%d\n",state,num);
         return 2; //stop to calculate
       }
+      num = state==0?num+1:num;
     }
   }
-  return (state==0)&&(max==1);
+  return (state==0)&&(num>1);
 }
 
 
