@@ -75,8 +75,8 @@ typedef struct token {
   int type;
   char str[32];
 } Token;
-
-static Token tokens[32] __attribute__((used)) = {};
+#define max_token 65535
+static Token tokens[max_token] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 int find_main_operator(int p, int q);
 int check_parentheses(int p,int q);
@@ -104,7 +104,7 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-        if (nr_token >= 32) {
+        if (nr_token >= max_token) {
           printf("Too many tokens : %d\n",nr_token);
           return false;
         }
