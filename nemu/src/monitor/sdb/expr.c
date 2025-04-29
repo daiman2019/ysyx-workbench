@@ -193,23 +193,23 @@ int eval(int p, int q) //p and q are the start and end index of tokens
     {
       return eval(p+1,q-1);
     }
-  else
-  {
-    int op = find_main_operator(p, q);
-    printf ("op = %d,p=%d,q=%d\n", op,p,q);
-    printf("main operater:%c\n",tokens[op].type);
-    if (op == -1) //no operator
+    else
     {
-      printf("no right operator\n");
-      assert(0);
-    }
+      int op = find_main_operator(p, q);
+      printf ("op = %d,p=%d,q=%d\n", op,p,q);
+      printf("main operater:%c\n",tokens[op].type);
+      if (op == -1) //no operator
+      {
+        printf("no right operator\n");
+        assert(0);
+      }
 
-    int val1 = eval(p, op - 1);
-    int val2 = eval(op + 1, q);
+      int val1 = eval(p, op - 1);
+      int val2 = eval(op + 1, q);
     
-    printf("val1 = %d, val2 = %d\n", val1, val2);
+      printf("val1 = %d, val2 = %d\n", val1, val2);
     
-    switch (tokens[op].type) {
+      switch (tokens[op].type) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
       case '*': return val1 * val2;
@@ -250,12 +250,13 @@ int find_main_operator(int p, int q) //find the main operator
 }
 int check_parentheses(int p,int q) //check if there are matched parentheses
 {
-  int state=0,num=0;
+  int state=0,num=0,max=0;
   for(int i=p;i<=q;i++)
   {
     if (tokens[i].type == '(')
     {
       state++;
+      max = state>max?state:max;
     }
     else if (tokens[i].type == ')')
     {
@@ -268,7 +269,7 @@ int check_parentheses(int p,int q) //check if there are matched parentheses
       num = state==0?num+1:num;
     }
   }
-  return (state==0)&&(num>1);
+  return (state==0)&&(num<=1)&&(max>=1);
 }
 
 
