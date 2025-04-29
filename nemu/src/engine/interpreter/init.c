@@ -22,7 +22,7 @@ void engine_start() {
   cpu_exec(-1);
 #else
   /* Receive commands from user. */
-  sdb_mainloop();
-  //test_expr();
+  //sdb_mainloop();
+  test_expr();
 #endif
 }
