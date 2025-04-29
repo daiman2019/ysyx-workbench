@@ -211,9 +211,8 @@ void init_sdb() {
 
 void test_expr()
 {
-    FILE *fp = fopen("home/Documents/dm/ysyx_gitcode/ysyx-workbench/nemu/tools/gen-expr/input", "r");
+    FILE *fp = fopen("home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/nemu/tools/gen-expr/input", "r");
     assert(fp != NULL);
-
     char* e=NULL;
     bool success;
     uint32_t correct_result,result;
