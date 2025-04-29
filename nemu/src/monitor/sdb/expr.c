@@ -251,6 +251,10 @@ int find_main_operator(int p, int q) //find the main operator
 int check_parentheses(int p,int q) //check if there are matched parentheses
 {
   int state=0,num=0,max=0;
+  if(tokens[p].type != '(' || tokens[q].type != ')')
+  {
+    return 0; //not matched
+  }
   for(int i=p;i<=q;i++)
   {
     if (tokens[i].type == '(')
