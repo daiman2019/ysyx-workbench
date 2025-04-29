@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
   int i;
   for (i = 0; i < loop; i ++) {
     pos = 0;
-    gen_rand_expr(100);
+    gen_rand_expr(100);//control the length of buf
 
     sprintf(code_buf, code_format, buf);
 

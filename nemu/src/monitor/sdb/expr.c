@@ -168,10 +168,10 @@ static bool make_token(char *e) {
   return true;
 }
 
-int eval(int p, int q) //p and q are the start and end index of tokens
+word_t eval(int p, int q) //p and q are the start and end index of tokens
 {
   int state = 0;
-  int val1=0,val2=0;
+  sword_t val1=0,val2=0;
   if (p > q) //wrong position
   {
     printf("p > q\n");

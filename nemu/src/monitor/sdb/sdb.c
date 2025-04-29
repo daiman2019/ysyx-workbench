@@ -96,7 +96,7 @@ static int cmd_x(char *args) {
 static int cmd_p(char *args) {
   printf("p: %s\n", args);
   bool success;
-  uint32_t result = 0;
+  word_t result = 0;
   if (args == NULL) {
     return -1;
   }
@@ -106,7 +106,7 @@ static int cmd_p(char *args) {
   }
   result = expr(exprarg, &success);
   if (success) {
-    printf("result = %d\n",result);
+    printf("result = %u\n",result);
     return 0;
   }
   return -1;
@@ -215,14 +215,14 @@ void test_expr()
     assert(fp != NULL);
     char* e=NULL;
     bool success;
-    uint32_t correct_result,result;
+    word_t correct_result,result;
     size_t len;
     ssize_t read;
     while(1)
     {
       if(fscanf(fp,"%u",&correct_result)==-1) break;
       read = getline(&e, &len, fp);
-      if (read == -1) break;
+      if (read == -1) break;// if failt to read or no more line
       e[read-1] = '\0';
       result = expr(e, &success);
       if(success)
