@@ -30,9 +30,51 @@ static char *code_format =
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
+int pos;
+static void gen(char c) 
+{
+  if(pos >= sizeof(buf) - 1) {
+    fprintf(stderr, "Buffer overflow\n");
+    exit(1);
+  }
+  buf[pos++] = c;
+  buf[pos] = '\0';
+}
+static int choose(int n) {
+  return rand() % n;
+}
+static void gen_rand_op() {
+  switch(choose(4))
+  {
+    case 0:gen('+');break;
+    case 1:gen('-');break;
+    case 2:gen('*');break;
+    default:gen('/');break;
+  }
+}
+static void gen_num()
+{
+  gen('0' + choose(10));
+}
 
-static void gen_rand_expr() {
-  buf[0] = '\0';
+static void gen_space()
+{
+  int i = choose(3);
+  for(int j=0;j<i;j++)
+    gen(' ');
+}
+
+static void gen_rand_expr(int depth) {
+  if (depth == 0) {
+    gen_num();
+    return;
+  }
+  switch(choose(3))
+  {
+    case 0:gen_num();gen_space();break;
+    case 1: gen('(');gen_rand_expr(depth-1);gen(')');break;
+    default:gen_rand_expr(depth-1);gen_rand_op();gen_rand_expr(depth-1);break;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -44,7 +86,8 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
-    gen_rand_expr();
+    pos = 0;
+    gen_rand_expr(100);//control the length of buf
 
     sprintf(code_buf, code_format, buf);
 
@@ -53,7 +96,7 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc /tmp/.code.c -Wall -Werror -o /tmp/.expr");//
     if (ret != 0) continue;
 
     fp = popen("/tmp/.expr", "r");
@@ -67,3 +110,6 @@ int main(int argc, char *argv[]) {
   }
   return 0;
 }
+
+
+

@@ -93,6 +93,26 @@ static int cmd_x(char *args) {
   return 0;
 }
 
+static int cmd_p(char *args) {
+  printf("p: %s\n", args);
+  bool success;
+  word_t result = 0;
+  if (args == NULL) {
+    return -1;
+  }
+  char *exprarg = strtok(args, " ");
+  if (exprarg == NULL) {
+    return -1;
+  }
+  result = expr(exprarg, &success);
+  if (success) {
+    printf("result = %u\n",result);
+    return 0;
+  }
+  return -1;
+}
+
+
 static struct {
   const char *name;
   const char *description;
@@ -105,7 +125,12 @@ static struct {
   /* Add more commands */
   { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
   { "info", "print the information of registers or watchpoints", cmd_info },
-  { "x", "examine memory and print the value",cmd_x }
+  { "x", "examine memory and print the value",cmd_x },
+  { "p", "evaluate the expression", cmd_p },
+ // { "w", "set watchpoint", cmd_w },
+ // { "d", "delete watchpoint", cmd_d },
+
+ // { NULL, NULL, NULL }
 
 };
 
@@ -183,3 +208,31 @@ void init_sdb() {
   /* Initialize the watchpoint pool. */
   init_wp_pool();
 }
+
+void test_expr()
+{
+    FILE *fp = fopen("/home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/nemu/tools/gen-expr/build/input", "r");
+    assert(fp != NULL);
+    char* e=NULL;
+    bool success;
+    word_t correct_result,result;
+    size_t len;
+    ssize_t read;
+    while(1)
+    {
+      if(fscanf(fp,"%u",&correct_result)==-1) break;
+      read = getline(&e, &len, fp);
+      if (read == -1) break;// if failt to read or no more line
+      e[read-1] = '\0';
+      result = expr(e, &success);
+      if(success)
+      {
+        printf("result = %u,correct_result = %u\n",result,correct_result);
+        assert(result == correct_result);
+      }
+    }
+    fclose(fp);
+    free(e);
+    printf("test expr success\n");
+}
+

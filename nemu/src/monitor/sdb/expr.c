@@ -19,6 +19,7 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <stdbool.h>
 
 enum {
   TK_NOTYPE = 256, TK_EQ,
@@ -39,6 +40,14 @@ static struct rule {
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
   {"==", TK_EQ},        // equal
+  {"\\*",'*'},       // multiply
+  {"-", '-'},         // minus
+  {"\\/", '/'},         // slash
+  {"\\(", '('},         // left parenthesis
+  {"\\)", ')'},         // right parenthesis
+  {"[0-9]+", '0'},      // decimal number
+  {"[a-zA-Z_][a-zA-Z0-9_]*", '1'}, // identifier
+  {"0x[0-9a-fA-F]+", '2'}, // hex number  
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -66,16 +75,18 @@ typedef struct token {
   int type;
   char str[32];
 } Token;
-
-static Token tokens[32] __attribute__((used)) = {};
+#define max_token 65535
+static Token tokens[max_token] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
-
+int find_main_operator(int p, int q);
+int check_parentheses(int p,int q);
 static bool make_token(char *e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
 
   nr_token = 0;
+  int copy_len = 0;
 
   while (e[position] != '\0') {
     /* Try all rules one by one. */
@@ -93,11 +104,57 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
-        switch (rules[i].token_type) {
-          default: TODO();
+        if (nr_token >= max_token) {
+          printf("Too many tokens : %d\n",nr_token);
+          return false;
         }
-
+        copy_len = substr_len > 31 ? 31 : substr_len;
+        switch (rules[i].token_type) {
+          case TK_NOTYPE: break;
+          case '+':
+            tokens[nr_token].type = '+';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case '-':
+            tokens[nr_token].type = '-';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case '*':
+            tokens[nr_token].type = '*';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case '/':
+            tokens[nr_token].type = '/';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case '(':
+            tokens[nr_token].type = '(';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case ')':
+            tokens[nr_token].type = ')';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case '0'://decimal number
+            tokens[nr_token].type = '0';
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          default: break;
+        }
         break;
       }
     }
@@ -111,6 +168,123 @@ static bool make_token(char *e) {
   return true;
 }
 
+word_t eval(int p, int q) //p and q are the start and end index of tokens
+{
+  int state = 0;
+  word_t val1=0,val2=0;
+  if (p > q) //wrong position
+  {
+    printf("p > q\n");
+    return 0;
+  }
+  else if (p == q) //must be a number
+  {
+    return atoi(tokens[p].str);
+  }
+  else
+  {
+    state = check_parentheses(p, q);
+    //printf("state=%d\n", state);
+    if(state==2) 
+    {
+      printf("wrong parentheses\n");
+      assert(0);
+    }
+    else if(state==1)
+    {
+      return eval(p+1,q-1);
+    }
+    else
+    {
+      int op = find_main_operator(p, q);
+      //printf ("op = %d,p=%d,q=%d\n", op,p,q);
+      //printf("main operater:%c\n",tokens[op].type);
+      if (op == -1) //no operator
+      {
+        printf("no right operator\n");
+        assert(0);
+      }
+
+      val1 = eval(p, op - 1);
+      val2 = eval(op + 1, q);
+    
+      //printf("val1 = %d, val2 = %d\n", val1, val2);
+    
+      switch (tokens[op].type) {
+      case '+': return val1 + val2;
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/': return (sword_t)val1 / (sword_t)val2;
+      default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
+     }
+    }
+  }
+}
+int find_main_operator(int p, int q) //find the main operator
+{
+  int i;
+  int op = -1;
+  int level = 0;
+  int main_op = 15, cur_op = 0;
+  for (i = q; i >= p; i--)
+  {
+    
+    if (tokens[i].type == ')')
+    {
+      level++;
+    }
+    else if (tokens[i].type == '(')
+    {
+      level--;
+    }
+    else if (level == 0)
+    {
+      if (tokens[i].type == '+' || tokens[i].type == '-')
+      {
+        cur_op = 1;
+        return i;
+      }
+      else if (tokens[i].type == '*' || tokens[i].type == '/')
+      {
+        //printf("tokens[%d].type = %c\n", i, tokens[i].type);
+        cur_op = 2;
+        if(cur_op < main_op)
+        {
+          op = i;
+          main_op = cur_op;
+        }
+      }
+    }
+  }
+  return op;
+}
+int check_parentheses(int p,int q) //check if there are matched parentheses
+{
+  int state=0,num=0,max=0;
+  if(tokens[p].type != '(' || tokens[q].type != ')')
+  {
+    return 0; //not matched
+  }
+  for(int i=p;i<=q;i++)
+  {
+    if (tokens[i].type == '(')
+    {
+      state++;
+      max = state>max?state:max;
+    }
+    else if (tokens[i].type == ')')
+    {
+      state--;
+      if(state<0)
+      {
+        return 2; //stop to calculate
+      }
+      num = state==0?num+1:num;
+    }
+  }
+  return (state==0)&&(num<=1)&&(max>=1);
+}
+
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -118,8 +292,10 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  /* Insert codes to evaluate the expression. */
+  *success = true;
+  return eval(0, nr_token-1);
 
-  return 0;
 }
+
+
