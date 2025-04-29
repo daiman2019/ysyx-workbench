@@ -168,7 +168,7 @@ static bool make_token(char *e) {
   return true;
 }
 
-uint32_t eval(int p, int q) //p and q are the start and end index of tokens
+int eval(int p, int q) //p and q are the start and end index of tokens
 {
   if (p > q) //wrong position
   {
