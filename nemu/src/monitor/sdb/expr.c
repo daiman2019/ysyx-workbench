@@ -210,13 +210,13 @@ int find_main_operator(int p, int q) //find the main operator
   int i;
   int op = -1;
   int level = 0;
-  for (i = p; i <= q; i++)
+  for (i = q; i >= p; i--)
   {
-    if (tokens[i].type == '(')
+    if (tokens[i].type == ')')
     {
       level++;
     }
-    else if (tokens[i].type == ')')
+    else if (tokens[i].type == '(')
     {
       level--;
     }
