@@ -184,7 +184,7 @@ int eval(int p, int q) //p and q are the start and end index of tokens
   else
   {
     state = check_parentheses(p, q);
-    printf("state=%d\n", state);
+    //printf("state=%d\n", state);
     if(state==2) 
     {
       printf("wrong parentheses\n");
@@ -197,8 +197,8 @@ int eval(int p, int q) //p and q are the start and end index of tokens
     else
     {
       int op = find_main_operator(p, q);
-      printf ("op = %d,p=%d,q=%d\n", op,p,q);
-      printf("main operater:%c\n",tokens[op].type);
+      //printf ("op = %d,p=%d,q=%d\n", op,p,q);
+      //printf("main operater:%c\n",tokens[op].type);
       if (op == -1) //no operator
       {
         printf("no right operator\n");
@@ -208,7 +208,7 @@ int eval(int p, int q) //p and q are the start and end index of tokens
       val1 = eval(p, op - 1);
       val2 = eval(op + 1, q);
     
-      printf("val1 = %d, val2 = %d\n", val1, val2);
+      //printf("val1 = %d, val2 = %d\n", val1, val2);
     
       switch (tokens[op].type) {
       case '+': return val1 + val2;
@@ -246,7 +246,7 @@ int find_main_operator(int p, int q) //find the main operator
       }
       else if (tokens[i].type == '*' || tokens[i].type == '/')
       {
-        printf("tokens[%d].type = %c\n", i, tokens[i].type);
+        //printf("tokens[%d].type = %c\n", i, tokens[i].type);
         cur_op = 2;
         if(cur_op < main_op)
         {
