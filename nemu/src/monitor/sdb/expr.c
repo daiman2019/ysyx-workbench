@@ -199,7 +199,7 @@ uint32_t eval(int p, int q) //p and q are the start and end index of tokens
       case '-': return val1 - val2;
       case '*': return val1 * val2;
       case '/': return val1 / val2;
-      default: printf("wrong main operater:%c\n",tokens[op].type);return 0;
+      default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
      }
   }
 }
