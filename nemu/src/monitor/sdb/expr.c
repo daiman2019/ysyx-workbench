@@ -227,7 +227,7 @@ int find_main_operator(int p, int q) //find the main operator
   int level = 0;
   for (i = q; i >= p; i--)
   {
-    printf("tokens[%d].type = %c\n", i, tokens[i].type);
+    
     if (tokens[i].type == ')')
     {
       level++;
@@ -244,6 +244,7 @@ int find_main_operator(int p, int q) //find the main operator
       }
       else if (tokens[i].type == '*' || tokens[i].type == '/')
       {
+        printf("tokens[%d].type = %c\n", i, tokens[i].type);
         op = i;
       }
     }
