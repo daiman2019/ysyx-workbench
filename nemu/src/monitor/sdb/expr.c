@@ -183,6 +183,7 @@ int eval(int p, int q) //p and q are the start and end index of tokens
   else
   {
     state = check_parentheses(p, q);
+    printf("state=%d\n", state);
     if(state==2) 
     {
       printf("wrong parentheses\n");
@@ -192,7 +193,6 @@ int eval(int p, int q) //p and q are the start and end index of tokens
     {
       return eval(p+1,q-1);
     }
-  
   else
   {
     int op = find_main_operator(p, q);
