@@ -189,7 +189,7 @@ int eval(int p, int q) //p and q are the start and end index of tokens
       printf("wrong parentheses\n");
       assert(0);
     }
-    else if(state==0)
+    else if(state==1)
     {
       return eval(p+1,q-1);
     }
