@@ -130,7 +130,7 @@ static struct {
  // { "w", "set watchpoint", cmd_w },
  // { "d", "delete watchpoint", cmd_d },
 
-  { NULL, NULL, NULL }
+ // { NULL, NULL, NULL }
 
 };
 
