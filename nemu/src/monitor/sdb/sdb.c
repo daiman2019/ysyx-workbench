@@ -227,7 +227,7 @@ void test_expr()
       result = expr(e, &success);
       if(success)
       {
-        printf("result = %d,correct_result = %d\n",result,correct_result);
+        printf("result = %u,correct_result = %u\n",result,correct_result);
         assert(result == correct_result);
       }
     }
