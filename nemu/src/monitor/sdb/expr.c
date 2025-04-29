@@ -191,9 +191,10 @@ int eval(int p, int q) //p and q are the start and end index of tokens
       printf("no right operator\n");
       assert(0);
     }
+    printf ("op = %d,p=%d\n", op,p);
     int val1 = eval(p, op - 1);
     int val2 = eval(op + 1, q);
-    printf ("op = %d,p=%d\n", op,p);
+    
     printf("val1 = %d, val2 = %d\n", val1, val2);
     printf("wrong main operater:%c\n",tokens[op].type);
     switch (tokens[op].type) {
