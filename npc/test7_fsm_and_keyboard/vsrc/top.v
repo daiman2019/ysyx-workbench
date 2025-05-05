@@ -1,6 +1,5 @@
 module top(
     input clk,clrn,ps2_clk,ps2_data,
-    input nextdata_n,
     output [7:0] data,
     output reg ready,
     output reg overflow,     // fifo overflow
@@ -8,7 +7,7 @@ module top(
 );
     wire [7:0] counter;
     wire [7:0] ascii;
-    wire [7:0] data;
+    wire [7:0] correct_data;
     wire nextdata_n;
     //接受键盘送来的数据
     ps2_keyboard keyboard(.clk(clk),
@@ -19,7 +18,7 @@ module top(
                 .ready(ready),
                 .nextdata_n(nextdata_n),
                 .overflow(overflow));
-    assign data = ready?data:8'b0;
+    assign correct_data = ready?data:8'b0;
 
     always@(posedge clk)begin
         if(ready&&~overflow)
@@ -38,14 +37,14 @@ module top(
     
     //将扫描码转换为ASCII码
     scan_code2ascii transfer(
-    .data(data),
+    .data(correct_data),
     .ascii(ascii));
     //显示按键
-    data2seg show_first(.data(data[3:0]),
+    data2seg show_first(.data(correct_data[3:0]),
     .neg_show(1'b0),
     .hout(hout[6:0]));
 
-    data2seg show_second(.data(data[7:4]),
+    data2seg show_second(.data(correct_data[7:4]),
     .neg_show(1'b0),
     .hout(hout[13:7]));
 
