@@ -9,9 +9,16 @@ module top(
     wire [7:0] counter;
     wire [7:0] ascii;
     wire [7:0] data;
+    wire nextdata_n;
     //接受键盘送来的数据
-    ps2_keyboard(clk,clrn,ps2_clk,ps2_data,
-                    data,ready,nextdata_n,overflow);
+    ps2_keyboard(.clk(clk),
+                .clrn(clrn),
+                .ps2_clk(ps2_clk),
+                .ps2_data(ps2_data),
+                .data(data),
+                .ready(ready),
+                .nextdata_n(nextdata_n),
+                .overflow(overflow));
     assign data = ready?data:8'b0;
 
     always@(posedge clk)begin
