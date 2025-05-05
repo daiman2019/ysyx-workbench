@@ -3,7 +3,7 @@ module top(
     output [7:0] data,
     output reg ready,
     output reg overflow,     // fifo overflow
-    output sampling
+    output sampling,
     output [41:0] hout
 );
     wire [7:0] counter;
