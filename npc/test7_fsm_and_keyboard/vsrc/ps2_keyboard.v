@@ -1,7 +1,8 @@
 module ps2_keyboard(input clk,
                     input clrn,
                     input ps2_clk,
-                    input ps2_data,data,
+                    input ps2_data,
+                    output [7:0]data,
                     output reg ready,
                     input nextdata_n,
                     output reg overflow);
