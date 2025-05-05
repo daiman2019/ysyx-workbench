@@ -1,10 +1,10 @@
-module ps2_keyboard(clk,clrn,ps2_clk,ps2_data,data,
-                    ready,nextdata_n,overflow);
-    input clk,clrn,ps2_clk,ps2_data;
-    input nextdata_n;
-    output [7:0] data;
-    output reg ready;
-    output reg overflow;     // fifo overflow
+module ps2_keyboard(input clk,
+                    input clrn,
+                    input ps2_clk,
+                    input ps2_data,data,
+                    output reg ready,
+                    input nextdata_n,
+                    output reg overflow);
     // internal signal, for test
     reg [9:0] buffer;        // ps2_data bits
     reg [7:0] fifo[7:0];     // data fifo

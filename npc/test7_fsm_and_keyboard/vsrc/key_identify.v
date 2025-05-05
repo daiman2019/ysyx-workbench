@@ -15,6 +15,4 @@ always@(posedge clk)begin
         end
     end
 end
-
-
 endmodule
