@@ -41,7 +41,7 @@ module scan_code2ascii(
             8'h3B: ascii = 8'h6A; // J
             8'h42: ascii = 8'h6B; // K
             8'h4B: ascii = 8'h6C; // L
-            8'h4C: ascii = 8'h3B // ;
+            8'h4C: ascii = 8'h3B; // ;
             8'h52: ascii = 8'h27; // '
             8'h5A: ascii = 8'h0D; // ENTER
 
