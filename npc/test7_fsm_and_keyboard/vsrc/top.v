@@ -1,9 +1,9 @@
 module top(
-    input clk,clrn,ps2_clk,ps2_data;
-    input nextdata_n;
-    output [7:0] data;
-    output reg ready;
-    output reg overflow;     // fifo overflow
+    input clk,clrn,ps2_clk,ps2_data,
+    input nextdata_n,
+    output [7:0] data,
+    output reg ready,
+    output reg overflow,     // fifo overflow
     output [41:0] hout
 );
     wire [7:0] counter;
@@ -50,7 +50,7 @@ module top(
     data2seg show_forth(.data(ascii[7:4]),
     .neg_show(1'b0),
     .hout(hout[27:21]));
-    
+
     //show key numbers
     data2seg show_fifth(.data(counter[3:0]),
     .neg_show(1'b0),
