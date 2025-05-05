@@ -3,6 +3,7 @@ module top(
     output [7:0] data,
     output reg ready,
     output reg overflow,     // fifo overflow
+    output sampling
     output [41:0] hout
 );
     wire [7:0] counter;
@@ -17,7 +18,8 @@ module top(
                 .data(data),
                 .ready(ready),
                 .nextdata_n(nextdata_n),
-                .overflow(overflow));
+                .overflow(overflow),
+                .sampling(sampling));
     assign correct_data = ready?data:8'b0;
 
     always@(posedge clk)begin
