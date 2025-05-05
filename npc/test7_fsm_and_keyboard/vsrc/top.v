@@ -37,7 +37,7 @@ module top(
     );
     
     //将扫描码转换为ASCII码
-    scan_code2ascii(
+    scan_code2ascii transfer(
     .data(data),
     .ascii(ascii));
     //显示按键
