@@ -8,7 +8,7 @@ module top(
     wire [7:0] counter;
     wire [7:0] ascii;
     wire [7:0] correct_data;
-    wire nextdata_n;
+    reg nextdata_n;
     //接受键盘送来的数据
     ps2_keyboard keyboard(.clk(clk),
                 .clrn(clrn),
