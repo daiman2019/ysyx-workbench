@@ -11,7 +11,7 @@ module top(
     wire [7:0] data;
     wire nextdata_n;
     //接受键盘送来的数据
-    ps2_keyboard(.clk(clk),
+    ps2_keyboard keyboard(.clk(clk),
                 .clrn(clrn),
                 .ps2_clk(ps2_clk),
                 .ps2_data(ps2_data),
@@ -29,7 +29,7 @@ module top(
     end
 
     //统计按键次数
-    key_counter(
+    key_counter counter_numbers(
         .clk(clk),
         .resetn(clrn),
         .data(data),
