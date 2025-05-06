@@ -45,29 +45,29 @@ module top (
         case (state)
             init:begin
                 if(~ready_before && ready)
-                    next<=show;
+                    next=show;
                 else 
-                    next<=init;
+                    next=init;
             end
             show:begin
                 if(~ready_before && ready && data==8'hF0)
-                    next<=close1;
+                    next=close1;
                 else
-                    next<=show;
+                    next=show;
             end
             close1:begin
                 if(~ready_before && ready)
-                    next<=close2;
+                    next=close2;
                 else 
-                    next<=close1;
+                    next=close1;
             end
             close2:begin
                 if(~ready_before && ready)
-                    next<=show;
+                    next=show;
                 else 
-                    next<=close2;
+                    next=close2;
             end
-            default:next<=init;
+            default:next=init;
         endcase
     end
     always@(posedge clk)begin
