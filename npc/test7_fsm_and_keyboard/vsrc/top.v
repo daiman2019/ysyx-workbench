@@ -10,7 +10,7 @@ module top (
     output [7:0] number,
     output [41:0] hout
 );
-    reg [7:0] out_data;
+    wire [7:0] out_data;
     reg nextdata_n;
     reg data_valid;
     wire [7:0] ascii;
