@@ -15,6 +15,8 @@ module top (
     reg data_valid;
     wire [7:0] ascii;
     reg ready_before;
+    paramter [2:0] init=0,show=1,close1=2,close2=3;
+    reg [2:0] state,next;
     ps2_keyboard  ps2_keyboard_i (
     .clk               (clk),
     .clrn              (clrn),
@@ -32,12 +34,59 @@ module top (
         else
             data_valid<=0;
     end   
-
+    //always show data
+    // always@(posedge clk)begin
+    //     if(~ready_before & ready)
+    //         out_data<=data;
+    //     else
+    //         out_data<=out_data;//out_data
+    // end
+    always@(*)begin
+        case state
+            init:begin
+                if(~ready_before && ready)
+                    next<=show;
+                else 
+                    next<=init;
+            end
+            show:begin
+                if(~ready_before && ready && data==8'hF0)
+                    next<=close1;
+                else
+                    next<=show;
+            end
+            close1:begin
+                if(~ready_before && ready)
+                    next<=close2;
+                else 
+                    next<=close1;
+            end
+            close2:begin
+                if(~ready_before && ready)
+                    next<=show;
+                else 
+                    next<=close2;
+            end
+        endcase
+    end
     always@(posedge clk)begin
-        if(~ready_before & ready)
-            out_data<=data;
+        if(~clrn)
+            state<=init;
         else
-            out_data<=out_data;//out_data
+            state<=next;
+    end
+    always@(*)begin
+        case state
+            init:out_data<=0;
+            show:begin
+                if(~ready_before && ready)
+                    out_data<=data;
+                else 
+                    out_data<=out_data;
+            end
+            close1:out_data<=0;
+            close2:out_data<=0;
+        endcase
     end
     always@(posedge clk)begin
         ready_before<=ready;
