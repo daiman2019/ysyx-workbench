@@ -37,7 +37,7 @@ module top (
         if(~ready_before & ready)
             out_data<=data;
         else
-            out_data<=out_data;
+            out_data<=0;//out_data
     end
     always@(posedge clk)begin
         ready_before<=ready;
