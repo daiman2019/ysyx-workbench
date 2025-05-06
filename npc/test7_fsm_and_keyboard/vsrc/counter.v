@@ -15,3 +15,4 @@ always @(posedge clk) begin
             number<=number;
 end
 endmodule
+
