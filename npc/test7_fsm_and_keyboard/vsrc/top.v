@@ -15,7 +15,7 @@ module top (
     reg data_valid;
     wire [7:0] ascii;
     reg ready_before;
-    paramter [1:0] init=0,show=1,close1=2,close2=3;
+    paramter init=0,show=1,close1=2,close2=3;
     reg [1:0] state,next;
     ps2_keyboard  ps2_keyboard_i (
     .clk               (clk),
