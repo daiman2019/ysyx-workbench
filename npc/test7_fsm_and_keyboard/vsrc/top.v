@@ -42,7 +42,7 @@ module top (
     //         out_data<=out_data;//out_data
     // end
     always@(*)begin
-        case state
+        case (state)
             init:begin
                 if(~ready_before && ready)
                     next<=show;
@@ -77,7 +77,7 @@ module top (
             state<=next;
     end
     always@(*)begin
-        case state
+        case (state)
             init:out_data<=0;
             show:begin
                 if(~ready_before && ready)
