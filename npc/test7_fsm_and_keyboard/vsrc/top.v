@@ -78,16 +78,16 @@ module top (
     end
     always@(*)begin
         case (state)
-            init:out_data<=0;
+            init:out_data=0;
             show:begin
                 if(~ready_before && ready)
-                    out_data<=data;
+                    out_data=data;
                 else 
-                    out_data<=out_data;
+                    out_data=out_data;
             end
-            close1:out_data<=0;
-            close2:out_data<=0;
-            default:out_data<=0;
+            close1:out_data=0;
+            close2:out_data=0;
+            default:out_data=0;
         endcase
     end
     always@(posedge clk)begin
