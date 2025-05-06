@@ -76,7 +76,7 @@ module top (
         else
             state<=next;
     end
-    assign out_data = (~ready_before && ready) ? data : 0;
+    assign out_data = (state==show) ? data : 0;
     // always@(posedge clk)begin
     //     case (state)
     //         init:out_data<=0;
