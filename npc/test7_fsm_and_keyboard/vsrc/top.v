@@ -10,7 +10,7 @@ module top (
     output [7:0] number,
     output [41:0] hout
 );
-    wire [7:0] out_data;
+    reg [7:0] out_data;
     reg nextdata_n;
     reg data_valid;
     wire [7:0] ascii;
@@ -76,18 +76,18 @@ module top (
         else
             state<=next;
     end
-    always@(*)begin
+    always@(posedge clk)begin
         case (state)
-            init:out_data=0;
+            init:out_data<=0;
             show:begin
                 if(~ready_before && ready)
-                    out_data=data;
+                    out_data<=data;
                 else 
-                    out_data=out_data;
+                    out_data<=out_data;
             end
-            close1:out_data=0;
-            close2:out_data=0;
-            default:out_data=0;
+            close1:out_data<=0;
+            close2:out_data<=0;
+            default:out_data<=0;
         endcase
     end
     always@(posedge clk)begin
