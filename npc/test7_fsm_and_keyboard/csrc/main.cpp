@@ -33,8 +33,8 @@ void sim_exit()
 }
 static void single_cycle()
 {
-    dut.clk=0;dut_eval();
-    dut.clk=1;dut_eval();
+    dut.clk=0;dut.eval();
+    dut.clk=1;dut.eval();
 }
 /*void sim_run()
 {
