@@ -76,20 +76,21 @@ module top (
         else
             state<=next;
     end
-    always@(posedge clk)begin
-        case (state)
-            init:out_data<=0;
-            show:begin
-                if(~ready_before && ready)
-                    out_data<=data;
-                else 
-                    out_data<=out_data;
-            end
-            close1:out_data<=0;
-            close2:out_data<=0;
-            default:out_data<=0;
-        endcase
-    end
+    assign out_data = (~ready_before && ready) ? data : 0;
+    // always@(posedge clk)begin
+    //     case (state)
+    //         init:out_data<=0;
+    //         show:begin
+    //             if(~ready_before && ready)
+    //                 out_data<=data;
+    //             else 
+    //                 out_data<=out_data;
+    //         end
+    //         close1:out_data<=0;
+    //         close2:out_data<=0;
+    //         default:out_data<=0;
+    //     endcase
+    // end
     always@(posedge clk)begin
         ready_before<=ready;
     end
