@@ -218,6 +218,7 @@ void test_expr()
     word_t correct_result,result;
     size_t len;
     ssize_t read;
+    int count=0;
     while(1)
     {
       if(fscanf(fp,"%u",&correct_result)==-1) break;
@@ -227,12 +228,13 @@ void test_expr()
       result = expr(e, &success);
       if(success)
       {
+        count++;
         printf("result = %u,correct_result = %u\n",result,correct_result);
         assert(result == correct_result);
       }
     }
     fclose(fp);
     free(e);
-    printf("test expr success\n");
+    printf("count=%d,test expr success\n",count);
 }
 
