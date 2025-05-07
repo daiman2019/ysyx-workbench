@@ -249,22 +249,25 @@ uint32_t value_compute(int token_type,char* token_str)
   return value;
 }
 
-word_t eval(int p, int q) //p and q are the start and end index of tokens
+word_t eval(int p, int q,bool* success) //p and q are the start and end index of tokens
 {
   //int state = 0;
   word_t val1=0,val2=0;
+  bool success1 = false,success2 = false;
   if (p > q) //wrong position
   {
     printf("p > q\n");
+    *success = false;
     return 0;
   }
   else if (p == q) //must be a decimal number or a hex number or a register
   {
+    *success = true;
     return value_compute(tokens[p].type,tokens[p].str);
   }
   else if(check_parentheses(p, q))
   {
-    return eval(p+1,q-1);//去掉最外层括号
+    return eval(p+1,q-1,success);//去掉最外层括号
   }
   else
   {
@@ -276,24 +279,35 @@ word_t eval(int p, int q) //p and q are the start and end index of tokens
       printf("no right operator\n");
       assert(0);
     }
-    val1 = eval(p, op - 1);
-    val2 = eval(op + 1, q);  
-    //printf("val1 = %d, val2 = %d\n", val1, val2);
-    switch (tokens[op].type) {
-    case TK_ADD: return val1 + val2;
-    case TK_SUB: return val1 - val2;
-    case TK_MUL: return val1 * val2;
-    case TK_DIV: return (sword_t)val1 / (sword_t)val2;
-    case TK_EQ: return val1 == val2;
-    case TK_NEQ: return val1 != val2;
-    case TK_AND: return val1 && val2;
-    case TK_DEREF: 
-    { 
-      uint32_t address = (uint32_t)strtoul(tokens[op].str,NULL,16);
-      return vaddr_read(address,4);
+    val1 = eval(p, op - 1,&success1);
+    val2 = eval(op + 1, q,&success2);  
+    if(!success2) 
+    {
+      *success=false;
+      return 0;
     }
-    case TK_MINUS: return 0-val2;
-    default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
+    if(success1)
+    {
+      switch(tokens[op].type)
+      {
+        case TK_ADD:return val1 + val2;
+        case TK_SUB:return val1 - val2;
+        case TK_MUL:return val1 * val2;
+        case TK_DIV:return (sword_t)val1 / (sword_t)val2;
+        case TK_EQ: return val1 == val2;
+        case TK_NEQ: return val1 != val2;
+        case TK_AND: return val1 && val2;
+        default: printf("wrong main operater:%d\n",tokens[op].type);*success = false;return 0;
+      }
+    }
+    else
+    {
+      switch(tokens[op].type)
+      {
+        case TK_DEREF: return vaddr_read(val2,4);
+        case TK_MINUS: return 0-val2;
+        default: printf("wrong main operater:%d\n",tokens[op].type);*success = false;return 0;
+      }
     }
   }
 }
@@ -372,15 +386,23 @@ int check_parentheses(int p,int q) //check if there are matched parentheses
 
 
 word_t expr(char *e, bool *success) {
+  word_t result;
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
 
   /* Insert codes to evaluate the expression. */
-  *success = true;
-  return eval(0, nr_token-1);
-
+  result =  eval(0, nr_token-1,success);
+  if(*success)
+  {
+    return result;
+  }
+  else
+  {
+    printf("wrong expression\n");
+    return 0;
+  }
 }
 
 
