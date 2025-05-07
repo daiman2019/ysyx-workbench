@@ -133,6 +133,6 @@ void cpu_exec(uint64_t n) {
           nemu_state.halt_pc);
       // fall through
     case NEMU_QUIT: statistic();
-    //case NEMU_STOP:sdb_mainloop();
+    case NEMU_STOP:sdb_mainloop();
   }
 }
