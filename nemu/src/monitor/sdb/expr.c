@@ -219,10 +219,10 @@ static bool make_token(char *e) {
 
   return true;
 }
-uint32_t value_compute(int token_type,char* token_str)
+uint32_t value_compute(int token_type,char* token_str,bool* success)
 {
   uint32_t value = 0;
-  bool success = false;
+  *success = true;
   switch (token_type) {
     case TK_DIGIT:
       value = atoi(token_str);
@@ -231,20 +231,21 @@ uint32_t value_compute(int token_type,char* token_str)
       value = strtoul(token_str, NULL, 16);
       break;
     case TK_REG:
-      value = isa_reg_str2val(&token_str[1], &success);
-      if(success) 
+      value = isa_reg_str2val(&token_str[1], success);
+      if(*success) 
       {
         return value;
       }
       else
       {
         printf("wrong register name:%s\n",token_str);
-        assert(0);
+        return 0;
       }
       break;
     default:
+     *success = false;
       printf("wrong token type:%d\n", token_type);
-      assert(0);
+      return 0;
   }
   return value;
 }
@@ -252,7 +253,7 @@ uint32_t value_compute(int token_type,char* token_str)
 word_t eval(int p, int q,bool* success) //p and q are the start and end index of tokens
 {
   //int state = 0;
-  word_t val1=0,val2=0;
+  word_t val1=0,val2=0,val=0;
   bool success1 = false,success2 = false;
   if (p > q) //wrong position
   {
@@ -262,8 +263,9 @@ word_t eval(int p, int q,bool* success) //p and q are the start and end index of
   }
   else if (p == q) //must be a decimal number or a hex number or a register
   {
-    *success = true;
-    return value_compute(tokens[p].type,tokens[p].str);
+    val = value_compute(tokens[p].type,tokens[p].str,success);
+    if(*success) return val;
+    else return 0;
   }
   else if(check_parentheses(p, q))
   {
@@ -277,7 +279,8 @@ word_t eval(int p, int q,bool* success) //p and q are the start and end index of
     if (op == -1) //no operator
     {
       printf("no right operator\n");
-      assert(0);
+      *success = false;
+      return 0;
     }
     val1 = eval(p, op - 1,&success1);
     val2 = eval(op + 1, q,&success2);  
