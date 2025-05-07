@@ -85,7 +85,7 @@ void free_wp(WP *wp) //return a watchpoint to the free list
 //delete a watchpoint
 void delete_wp(int NO) 
 {
-  WP *delete_number = NULL;
-  delete_number->NO = NO;
-  free_wp(delete_number);
+  WP delete_number;
+  delete_number.NO = NO;
+  free_wp(&delete_number);
 }
