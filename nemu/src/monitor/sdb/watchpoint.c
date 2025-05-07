@@ -114,6 +114,7 @@ void delete_wp(int NO)
 int scan_wp() 
 {
   WP *curr = head;
+  int val = 0;
   while (curr != NULL) 
   {
     if (curr->is_active) 
@@ -124,12 +125,12 @@ int scan_wp()
         printf("Watchpoint %d: %s\n", curr->NO, curr->expr);
         printf("Old value: %u, New value: %u\n", curr->old_value, new_value);
         curr->old_value = new_value; //update the old value
-        return 1; //return 1 if there is a watchpoint hit
+        val = 1;
       }
     }
     curr = curr->next;
   }
-  return 0; //return 0 if there is no watchpoint hit
+  return val; //return 0 if there is no watchpoint hit,return 1 if there is a watchpoint hit
 }
 //print all watchpoints
 void print_all_wp() 

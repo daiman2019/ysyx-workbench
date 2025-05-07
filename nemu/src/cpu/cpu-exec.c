@@ -42,11 +42,12 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-  if(scan_wp())
-  {
-    nemu_state.state = NEMU_STOP;
-    printf("Watchpoint hit!\n");
-  }
+  IFDEF(CONFIG_WATCHPOINT, scan_wp());
+  // if(scan_wp())
+  // {
+  //   nemu_state.state = NEMU_STOP;
+  //   printf("Watchpoint hit!\n");
+  // }
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
