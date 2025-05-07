@@ -72,6 +72,12 @@ static int cmd_info(char *args) {
   if(strcmp(args, "r") == 0) {
     isa_reg_display();
   }
+  else if(strcmp(args, "w") == 0) {
+    print_all_wp();
+  }
+  else {
+    printf("Unknown command '%s'\n", args);
+  }
   return 0;
 }
 

@@ -41,7 +41,7 @@ void init_wp_pool() {
 }
 
 /* Implement the functionality of watchpoint */
-WP* new_wp() //return a free watchpoint
+WP* new_wp() //return a free watchpoint to use
 {
   if (free_ == NULL) {
     printf("No free watchpoint!\n");
@@ -129,4 +129,21 @@ int scan_wp()
     curr = curr->next;
   }
   return 0; //return 0 if there is no watchpoint hit
+}
+//print all watchpoints
+void print_all_wp() 
+{
+  WP *curr = head;//all used watchpoints
+  if(curr == NULL) 
+  {
+    printf("No watchpoints set!\n");
+    return;
+  }
+  printf("       num      active       expr\n");
+  printf("====================================\n");
+  while (curr != NULL) 
+  {
+    printf("Watchpoint %d   %d    %s\n", curr->NO, curr->is_active,curr->expr);
+    curr = curr->next;
+  }
 }
