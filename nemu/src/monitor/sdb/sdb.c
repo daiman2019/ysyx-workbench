@@ -193,7 +193,8 @@ void sdb_mainloop() {
     cmd_c(NULL);
     return;
   }
-  for (char *str; (str = rl_gets()) != NULL; ) {
+  for (char *str; (str = rl_gets()) != NULL; ) 
+  {
     char *str_end = str + strlen(str);
 
     /* extract the first token as the command */
@@ -214,8 +215,10 @@ void sdb_mainloop() {
 #endif
 
     int i;
-    for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(cmd, cmd_table[i].name) == 0) {
+    for (i = 0; i < NR_CMD; i ++) 
+    {
+      if (strcmp(cmd, cmd_table[i].name) == 0) 
+      {
         if (cmd_table[i].handler(args) < 0) { return; }
         break;
       }
