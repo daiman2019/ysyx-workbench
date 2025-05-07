@@ -20,12 +20,10 @@
  */
 #include <regex.h>
 #include <stdbool.h>
+#include <memory/vaddr.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
-
-  /* TODO: Add more token types */
-
+  TK_NOTYPE = 256, TK_EQ,TK_NEQ,TK_AND,TK_DEREF,TK_MINUS,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LEFT,TK_RIGHT,TK_DIGIT,TK_VAR,TK_HEX,TK_REG
 };
 
 static struct rule {
@@ -38,20 +36,24 @@ static struct rule {
    */
 
   {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
+  {"\\+", TK_ADD},         // plus
   {"==", TK_EQ},        // equal
-  {"\\*",'*'},       // multiply
-  {"-", '-'},         // minus
-  {"\\/", '/'},         // slash
-  {"\\(", '('},         // left parenthesis
-  {"\\)", ')'},         // right parenthesis
-  {"[0-9]+", '0'},      // decimal number
-  {"[a-zA-Z_][a-zA-Z0-9_]*", '1'}, // identifier
-  {"0x[0-9a-fA-F]+", '2'}, // hex number  
+  {"!=", TK_NEQ},       //not equal
+  {"&&", TK_AND},       //and 
+  {"\\*",TK_MUL},       // multiply
+  {"-", TK_SUB},         // minus
+  {"\\/", TK_DIV},         // slash
+  {"\\(", TK_LEFT},         // left parenthesis
+  {"\\)", TK_RIGHT},         // right parenthesis
+  {"[0-9]+", TK_DIGIT},      // decimal number
+  {"[a-zA-Z_][a-zA-Z0-9_]*", TK_VAR}, // identifier
+  {"0x[0-9a-fA-F]+", TK_HEX}, // hex number  
+  {"\\$\\w+", TK_REG}, // register
 };
 
 #define NR_REGEX ARRLEN(rules)
-
+#define max_token 65535
+#define max_token_len 32
 static regex_t re[NR_REGEX] = {};
 
 /* Rules are used for many times.
@@ -73,9 +75,9 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[32];
+  char str[max_token_len];
 } Token;
-#define max_token 65535
+
 static Token tokens[max_token] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 int find_main_operator(int p, int q);
@@ -108,47 +110,97 @@ static bool make_token(char *e) {
           printf("Too many tokens : %d\n",nr_token);
           return false;
         }
-        copy_len = substr_len > 31 ? 31 : substr_len;
+        copy_len = substr_len > max_token_len-1 ? max_token_len-1 : substr_len;
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
-          case '+':
-            tokens[nr_token].type = '+';
+          case TK_ADD:
+            tokens[nr_token].type = TK_ADD;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
             break;
-          case '-':
-            tokens[nr_token].type = '-';
+          case TK_SUB:
+            if(nr_token>0 && ((tokens[nr_token-1].type == TK_DIGIT)||(tokens[nr_token-1].type == TK_HEX)))
+            {
+              tokens[nr_token].type = TK_SUB;
+              strncpy(tokens[nr_token].str, substr_start, copy_len);
+              tokens[nr_token].str[copy_len] = '\0';
+              nr_token++;
+            }
+            else
+            {
+              tokens[nr_token].type = TK_MINUS;
+              strncpy(tokens[nr_token].str, substr_start, copy_len);
+              tokens[nr_token].str[copy_len] = '\0';
+              nr_token++;
+            }
+            break;
+          case TK_MUL://mul or dereference
+            if(nr_token>0 && ((tokens[nr_token-1].type == TK_DIGIT)||(tokens[nr_token-1].type == TK_HEX)))
+            {
+              tokens[nr_token].type = TK_MUL;
+              strncpy(tokens[nr_token].str, substr_start, copy_len);
+              tokens[nr_token].str[copy_len] = '\0';
+              nr_token++;
+            }
+            else
+            {
+              tokens[nr_token].type = TK_DEREF;
+              strncpy(tokens[nr_token].str, substr_start, copy_len);
+              tokens[nr_token].str[copy_len] = '\0';
+              nr_token++;
+            }
+            break;
+          case TK_DIV:
+            tokens[nr_token].type = TK_DIV;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
             break;
-          case '*':
-            tokens[nr_token].type = '*';
+          case TK_LEFT:
+            tokens[nr_token].type = TK_LEFT;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
             break;
-          case '/':
-            tokens[nr_token].type = '/';
+          case TK_RIGHT:
+            tokens[nr_token].type = TK_RIGHT;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
             break;
-          case '(':
-            tokens[nr_token].type = '(';
+          case TK_DIGIT://decimal number
+            tokens[nr_token].type = TK_DIGIT;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
             break;
-          case ')':
-            tokens[nr_token].type = ')';
+          case TK_HEX://hex number
+            tokens[nr_token].type = TK_HEX;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
             break;
-          case '0'://decimal number
-            tokens[nr_token].type = '0';
+          case TK_EQ:
+            tokens[nr_token].type = TK_EQ;
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case TK_NEQ:
+            tokens[nr_token].type = TK_NEQ;
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case TK_AND:
+            tokens[nr_token].type = TK_AND;
+            strncpy(tokens[nr_token].str, substr_start, copy_len);
+            tokens[nr_token].str[copy_len] = '\0';
+            nr_token++;
+            break;
+          case TK_REG:
+            tokens[nr_token].type = TK_REG;
             strncpy(tokens[nr_token].str, substr_start, copy_len);
             tokens[nr_token].str[copy_len] = '\0';
             nr_token++;
@@ -167,56 +219,71 @@ static bool make_token(char *e) {
 
   return true;
 }
+uint32_t value_compute(int token_type,char* token_str)
+{
+  uint32_t value = 0;
+  switch (token_type) {
+    case TK_DIGIT:
+      value = atoi(token_str);
+      break;
+    case TK_HEX:
+      value = strtoul(token_str, NULL, 16);
+      break;
+    case TK_REG:
+      value = isa_reg_str2val(token_str, NULL);
+      break;
+    default:
+      printf("wrong token type:%d\n", token_type);
+      assert(0);
+  }
+  return value;
+}
 
 word_t eval(int p, int q) //p and q are the start and end index of tokens
 {
-  int state = 0;
+  //int state = 0;
   word_t val1=0,val2=0;
   if (p > q) //wrong position
   {
     printf("p > q\n");
     return 0;
   }
-  else if (p == q) //must be a number
+  else if (p == q) //must be a decimal number or a hex number or a register
   {
-    return atoi(tokens[p].str);
+    return value_compute(tokens[p].type,tokens[p].str);
+  }
+  else if(check_parentheses(p, q))
+  {
+    return eval(p+1,q-1);//去掉最外层括号
   }
   else
   {
-    state = check_parentheses(p, q);
-    //printf("state=%d\n", state);
-    if(state==2) 
+    int op = find_main_operator(p, q);
+    //printf ("op = %d,p=%d,q=%d\n", op,p,q);
+    //printf("main operater:%c\n",tokens[op].type);
+    if (op == -1) //no operator
     {
-      printf("wrong parentheses\n");
+      printf("no right operator\n");
       assert(0);
     }
-    else if(state==1)
-    {
-      return eval(p+1,q-1);
+    val1 = eval(p, op - 1);
+    val2 = eval(op + 1, q);  
+    //printf("val1 = %d, val2 = %d\n", val1, val2);
+    switch (tokens[op].type) {
+    case TK_ADD: return val1 + val2;
+    case TK_SUB: return val1 - val2;
+    case TK_MUL: return val1 * val2;
+    case TK_DIV: return (sword_t)val1 / (sword_t)val2;
+    case TK_EQ: return val1 == val2;
+    case TK_NEQ: return val1 != val2;
+    case TK_AND: return val1 && val2;
+    case TK_DEREF: 
+    { 
+      uint32_t address = (uint32_t)strtoul(tokens[op].str,NULL,16);
+      return vaddr_read(address,4);
     }
-    else
-    {
-      int op = find_main_operator(p, q);
-      //printf ("op = %d,p=%d,q=%d\n", op,p,q);
-      //printf("main operater:%c\n",tokens[op].type);
-      if (op == -1) //no operator
-      {
-        printf("no right operator\n");
-        assert(0);
-      }
-
-      val1 = eval(p, op - 1);
-      val2 = eval(op + 1, q);
-    
-      //printf("val1 = %d, val2 = %d\n", val1, val2);
-    
-      switch (tokens[op].type) {
-      case '+': return val1 + val2;
-      case '-': return val1 - val2;
-      case '*': return val1 * val2;
-      case '/': return (sword_t)val1 / (sword_t)val2;
-      default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
-     }
+    case TK_MINUS: return 0-val2;
+    default: printf("wrong main operater:%d\n",tokens[op].type);return 0;
     }
   }
 }
@@ -228,31 +295,41 @@ int find_main_operator(int p, int q) //find the main operator
   int main_op = 15, cur_op = 0;
   for (i = q; i >= p; i--)
   {
-    
-    if (tokens[i].type == ')')
+    if (tokens[i].type == TK_RIGHT)
     {
       level++;
     }
-    else if (tokens[i].type == '(')
+    else if (tokens[i].type == TK_LEFT)
     {
       level--;
     }
     else if (level == 0)
     {
-      if (tokens[i].type == '+' || tokens[i].type == '-')
+      if (tokens[i].type == TK_ADD || tokens[i].type == TK_SUB)
       {
-        cur_op = 1;
-        return i;
+        cur_op = 3;
       }
-      else if (tokens[i].type == '*' || tokens[i].type == '/')
+      else if (tokens[i].type == TK_MUL || tokens[i].type == TK_DIV)
       {
         //printf("tokens[%d].type = %c\n", i, tokens[i].type);
         cur_op = 2;
-        if(cur_op < main_op)
-        {
-          op = i;
-          main_op = cur_op;
-        }
+      }
+      else if(tokens[i].type == TK_MINUS || tokens[i].type == TK_DEREF)
+      {
+        cur_op = 1;
+      }
+      else if(tokens[i].type == TK_EQ || tokens[i].type == TK_NEQ)
+      {
+        cur_op = 4;
+      }
+      else if(tokens[i].type == TK_AND)
+      {
+        cur_op = 5;
+      }
+      if(cur_op > main_op)
+      {
+        main_op = cur_op;
+        op = i;
       }
     }
   }
@@ -260,29 +337,27 @@ int find_main_operator(int p, int q) //find the main operator
 }
 int check_parentheses(int p,int q) //check if there are matched parentheses
 {
-  int state=0,num=0,max=0;
-  if(tokens[p].type != '(' || tokens[q].type != ')')
+  int state=0;
+  if(tokens[p].type != TK_LEFT || tokens[q].type != TK_RIGHT)
   {
     return 0; //not matched
   }
   for(int i=p;i<=q;i++)
   {
-    if (tokens[i].type == '(')
+    if (tokens[i].type == TK_LEFT)
     {
       state++;
-      max = state>max?state:max;
     }
-    else if (tokens[i].type == ')')
+    else if (tokens[i].type == TK_RIGHT)
     {
       state--;
-      if(state<0)
-      {
-        return 2; //stop to calculate
-      }
-      num = state==0?num+1:num;
+    }
+    if (state==0) //matched parentheses
+    {
+      return i==q; //the leftmost ( and the rightmost ) are matched
     }
   }
-  return (state==0)&&(num<=1)&&(max>=1);
+  return 0;
 }
 
 
