@@ -120,7 +120,7 @@ static bool make_token(char *e) {
             nr_token++;
             break;
           case TK_SUB:
-            if(nr_token>0 && ((tokens[nr_token-1].type == TK_DIGIT)||(tokens[nr_token-1].type == TK_HEX)))
+            if(nr_token>0 && ((tokens[nr_token-1].type == TK_DIGIT)||(tokens[nr_token-1].type == TK_HEX)||(tokens[nr_token-1].type == TK_RIGHT)||(tokens[nr_token-1].type == TK_REG)))
             {
               tokens[nr_token].type = TK_SUB;
               strncpy(tokens[nr_token].str, substr_start, copy_len);
@@ -136,7 +136,7 @@ static bool make_token(char *e) {
             }
             break;
           case TK_MUL://mul or dereference
-            if(nr_token>0 && ((tokens[nr_token-1].type == TK_DIGIT)||(tokens[nr_token-1].type == TK_HEX)))
+            if(nr_token>0 && ((tokens[nr_token-1].type == TK_DIGIT)||(tokens[nr_token-1].type == TK_HEX)||(tokens[nr_token-1].type == TK_RIGHT)||(tokens[nr_token-1].type == TK_REG)))
             {
               tokens[nr_token].type = TK_MUL;
               strncpy(tokens[nr_token].str, substr_start, copy_len);
