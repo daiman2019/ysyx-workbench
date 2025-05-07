@@ -272,7 +272,7 @@ word_t eval(int p, int q,bool* success) //p and q are the start and end index of
   else
   {
     int op = find_main_operator(p, q);
-    //printf ("op = %d,p=%d,q=%d\n", op,p,q);
+    printf ("op = %d,p=%d,q=%d\n", op,p,q);
     //printf("main operater:%c\n",tokens[op].type);
     if (op == -1) //no operator
     {
