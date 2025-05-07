@@ -145,7 +145,7 @@ void print_all_wp()
   printf("====================================\n");
   while (curr != NULL) 
   {
-    printf("Watchpoint %d   %d    %s\n", curr->NO, curr->is_active,curr->expr);
+    printf("Watchpoint %d     %d        %s\n", curr->NO, curr->is_active,curr->expr);
     curr = curr->next;
   }
 }
