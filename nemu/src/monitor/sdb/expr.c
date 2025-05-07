@@ -288,6 +288,7 @@ word_t eval(int p, int q,bool* success) //p and q are the start and end index of
     }
     if(success1)
     {
+      *success = true;
       switch(tokens[op].type)
       {
         case TK_ADD:return val1 + val2;
