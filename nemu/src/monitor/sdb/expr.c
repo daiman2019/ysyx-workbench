@@ -292,7 +292,7 @@ int find_main_operator(int p, int q) //find the main operator
   int i;
   int op = -1;
   int level = 0;
-  int main_op = 15, cur_op = 0;
+  int main_op = 0, cur_op = 0;
   for (i = q; i >= p; i--)
   {
     if (tokens[i].type == TK_RIGHT)
