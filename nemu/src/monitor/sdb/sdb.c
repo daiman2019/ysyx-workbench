@@ -88,7 +88,7 @@ static int cmd_x(char *args) {
   int n = atoi(value_numbers);
   uint32_t address = (uint32_t)strtoul(expr,NULL,16);//0xdata->addr
   for(int i = 0; i < n; i++) {
-    printf("addr is %08x , value is %08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
+    printf("addr is %08x0x , value is %08x0x\n", address + i * 4,vaddr_read(address + i * 4, 4));
   }
   return 0;
 }
@@ -123,10 +123,10 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* Add more commands */
-  { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
-  { "info", "print the information of registers or watchpoints", cmd_info },
-  { "x", "examine memory and print the value",cmd_x },
-  { "p", "evaluate the expression", cmd_p },
+  { "si", "si or si:N:execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
+  { "info", "info r:print the information of registers or watchpoints", cmd_info },
+  { "x", "x number start_addr:examine memory and print the value",cmd_x },
+  { "p", "p expr:evaluate the expression", cmd_p },
  // { "w", "set watchpoint", cmd_w },
  // { "d", "delete watchpoint", cmd_d },
 
