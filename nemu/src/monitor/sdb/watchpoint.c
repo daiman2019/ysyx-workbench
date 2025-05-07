@@ -39,5 +39,53 @@ void init_wp_pool() {
   free_ = wp_pool;
 }
 
-/* TODO: Implement the functionality of watchpoint */
+/* Implement the functionality of watchpoint */
+WP* new_wp() //return a free watchpoint
+{
+  if (free_ == NULL) {
+    printf("No free watchpoint!\n");
+    return NULL;
+  }
+  WP *free_wp = free_;
+  free_ = free_->next;
+  free_wp->next = head;
+  head = free_wp;
+  return free_wp;
+}
 
+void free_wp(WP *wp) //return a watchpoint to the free list
+{
+  if (wp == NULL) 
+  {
+    return;
+  }
+  WP *prev = NULL, *curr = head;
+  while (curr != NULL && curr->NO != wp->NO) //find wp in the head list
+  {
+    prev = curr;
+    curr = curr->next;
+  }
+  if (curr == NULL) 
+  {
+    printf("Watchpoint not found!\n");
+    return;
+  }
+  if (prev == NULL) 
+  {
+    head = curr->next;
+  } 
+  else 
+  {
+    prev->next = curr->next;
+  }
+  curr->next = free_;
+  free_ = curr;
+}
+
+//delete a watchpoint
+void delete_wp(int NO) 
+{
+  WP *delete_number = NULL;
+  delete_number->NO = NO;
+  free_wp(delete_number);
+}

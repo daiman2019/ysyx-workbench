@@ -112,6 +112,31 @@ static int cmd_p(char *args) {
   return -1;
 }
 
+static int cmd_w(char *args) {
+  printf("w: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  char *exprarg = strtok(args, " ");
+  if (exprarg == NULL) {
+    return -1;
+  }
+  return 0;
+}
+static int cmd_d(char *args) {
+  printf("d: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  char *value_numbers = strtok(args, " ");
+  if (value_numbers == NULL ) {
+    return -1;
+  }
+  int n = atoi(value_numbers);
+  //delete watchpoint n
+  delete_wp(n);
+  return 0;
+}
 
 static struct {
   const char *name;
@@ -127,9 +152,8 @@ static struct {
   { "info", "info r:print the information of registers or watchpoints", cmd_info },
   { "x", "x number start_addr:examine memory and print the value",cmd_x },
   { "p", "p expr:evaluate the expression", cmd_p },
- // { "w", "set watchpoint", cmd_w },
- // { "d", "delete watchpoint", cmd_d },
-
+  { "w", "w expr : set watchpoint", cmd_w },
+  { "d", "d N:delete number N watchpoint", cmd_d },
  // { NULL, NULL, NULL }
 
 };
@@ -168,7 +192,6 @@ void sdb_mainloop() {
     cmd_c(NULL);
     return;
   }
-
   for (char *str; (str = rl_gets()) != NULL; ) {
     char *str_end = str + strlen(str);
 
