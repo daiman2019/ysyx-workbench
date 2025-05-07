@@ -123,6 +123,7 @@ int scan_wp()
       {
         printf("Watchpoint %d: %s\n", curr->NO, curr->expr);
         printf("Old value: %u, New value: %u\n", curr->old_value, new_value);
+        curr->old_value = new_value; //update the old value
         return 1; //return 1 if there is a watchpoint hit
       }
     }
