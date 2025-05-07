@@ -152,8 +152,8 @@ config ITRACE_COND
   default "true"
 
 config WATCHPOINT
-  string "set watchpoint and trace"
-  default "true"
+  bool "set watchpoint and trace"
+  default y
   
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
