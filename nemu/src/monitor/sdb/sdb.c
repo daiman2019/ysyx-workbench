@@ -88,7 +88,7 @@ static int cmd_x(char *args) {
   int n = atoi(value_numbers);
   uint32_t address = (uint32_t)strtoul(expr,NULL,16);//0xdata->addr
   for(int i = 0; i < n; i++) {
-    printf("addr is %08x0x , value is %08x0x\n", address + i * 4,vaddr_read(address + i * 4, 4));
+    printf("addr is 0x%08x , value is 0x%08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
   }
   return 0;
 }
