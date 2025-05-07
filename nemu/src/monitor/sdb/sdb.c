@@ -121,6 +121,7 @@ static int cmd_w(char *args) {
   if (exprarg == NULL) {
     return -1;
   }
+  set_wp(exprarg);
   return 0;
 }
 static int cmd_d(char *args) {
@@ -149,7 +150,7 @@ static struct {
 
   /* Add more commands */
   { "si", "si or si:N:execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
-  { "info", "info r:print the information of registers or watchpoints", cmd_info },
+  { "info", "info r/w:print the information of registers or watchpoints", cmd_info },
   { "x", "x number start_addr:examine memory and print the value",cmd_x },
   { "p", "p expr:evaluate the expression", cmd_p },
   { "w", "w expr : set watchpoint", cmd_w },

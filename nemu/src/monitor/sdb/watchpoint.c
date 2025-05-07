@@ -20,9 +20,9 @@
 typedef struct watchpoint {
   int NO;
   struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
+  char* expr;
+  word_t old_value;
+  bool is_active;
 } WP;
 
 static WP wp_pool[NR_WP] = {};
@@ -33,8 +33,10 @@ void init_wp_pool() {
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].expr = NULL;
+    wp_pool[i].old_value = 0;
+    wp_pool[i].is_active = false;
   }
-
   head = NULL;
   free_ = wp_pool;
 }
@@ -81,6 +83,26 @@ void free_wp(WP *wp) //return a watchpoint to the free list
   curr->next = free_;
   free_ = curr;
 }
+//set a new watchpoint
+void set_wp(char *expression) 
+{
+  WP *new_watchpoint = new_wp();
+  if (new_watchpoint == NULL) 
+  {
+    return;
+  }
+  new_watchpoint->expr = expression;
+  new_watchpoint->old_value = expr(expression, &new_watchpoint->is_active);
+  if (new_watchpoint->is_active) 
+  {
+    printf("Watchpoint %d: %s\n", new_watchpoint->NO, new_watchpoint->expr);
+  } 
+  else 
+  {
+    printf("Invalid watchpoint expression!\n");
+    free_wp(new_watchpoint);
+  }
+}
 
 //delete a watchpoint
 void delete_wp(int NO) 
@@ -88,4 +110,24 @@ void delete_wp(int NO)
   WP delete_number;
   delete_number.NO = NO;
   free_wp(&delete_number);
+}
+//scan all watchpoints
+int scan_wp() 
+{
+  WP *curr = head;
+  while (curr != NULL) 
+  {
+    if (curr->is_active) 
+    {
+      word_t new_value = expr(curr->expr, &curr->is_active);
+      if (curr->is_active && new_value != curr->old_value) 
+      {
+        printf("Watchpoint %d: %s\n", curr->NO, curr->expr);
+        printf("Old value: %u, New value: %u\n", curr->old_value, new_value);
+        return 1; //return 1 if there is a watchpoint hit
+      }
+    }
+    curr = curr->next;
+  }
+  return 0; //return 0 if there is no watchpoint hit
 }

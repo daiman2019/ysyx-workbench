@@ -20,5 +20,7 @@
 
 word_t expr(char *e, bool *success);
 void delete_wp(int NO);
+void set_wp(char *expression);
+
 
 #endif
