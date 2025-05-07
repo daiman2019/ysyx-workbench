@@ -20,7 +20,7 @@
 typedef struct watchpoint {
   int NO;
   struct watchpoint *next;
-  char* expr;
+  char expr[max_token_len];
   word_t old_value;
   bool is_active;
 } WP;
@@ -33,7 +33,6 @@ void init_wp_pool() {
   for (i = 0; i < NR_WP; i ++) {
     wp_pool[i].NO = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
-    wp_pool[i].expr = NULL;
     wp_pool[i].old_value = 0;
     wp_pool[i].is_active = false;
   }
@@ -91,7 +90,7 @@ void set_wp(char *expression)
   {
     return;
   }
-  new_watchpoint->expr = expression;
+  strcpy(new_watchpoint->expr, expression);
   new_watchpoint->old_value = expr(expression, &new_watchpoint->is_active);
   if (new_watchpoint->is_active) 
   {

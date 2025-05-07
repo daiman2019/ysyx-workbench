@@ -21,6 +21,7 @@
 #include <regex.h>
 #include <stdbool.h>
 #include <memory/vaddr.h>
+#include "sdb.h"
 
 enum {
   TK_NOTYPE = 256, TK_EQ,TK_NEQ,TK_AND,TK_DEREF,TK_MINUS,TK_ADD,TK_SUB,TK_MUL,TK_DIV,TK_LEFT,TK_RIGHT,TK_DIGIT,TK_VAR,TK_HEX,TK_REG
@@ -53,7 +54,7 @@ static struct rule {
 
 #define NR_REGEX ARRLEN(rules)
 #define max_token 65535
-#define max_token_len 32
+
 static regex_t re[NR_REGEX] = {};
 
 /* Rules are used for many times.
@@ -395,7 +396,6 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-
   /* Insert codes to evaluate the expression. */
   result =  eval(0, nr_token-1,success);
   if(*success)
