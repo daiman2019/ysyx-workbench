@@ -45,9 +45,9 @@ static struct rule {
   {"\\/", TK_DIV},         // slash
   {"\\(", TK_LEFT},         // left parenthesis
   {"\\)", TK_RIGHT},         // right parenthesis
+  {"0x[0-9a-fA-F]+", TK_HEX}, // hex number  
   {"[0-9]+", TK_DIGIT},      // decimal number
   {"[a-zA-Z_][a-zA-Z0-9_]*", TK_VAR}, // identifier
-  {"0x[0-9a-fA-F]+", TK_HEX}, // hex number  
   {"\\$\\w+", TK_REG}, // register
 };
 
