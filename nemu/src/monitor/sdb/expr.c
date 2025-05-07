@@ -222,6 +222,7 @@ static bool make_token(char *e) {
 uint32_t value_compute(int token_type,char* token_str)
 {
   uint32_t value = 0;
+  bool success = false;
   switch (token_type) {
     case TK_DIGIT:
       value = atoi(token_str);
@@ -230,7 +231,16 @@ uint32_t value_compute(int token_type,char* token_str)
       value = strtoul(token_str, NULL, 16);
       break;
     case TK_REG:
-      value = isa_reg_str2val(&token_str[1], NULL);
+      value = isa_reg_str2val(&token_str[1], &success);
+      if(success) 
+      {
+        return value;
+      }
+      else
+      {
+        printf("wrong register name:%s\n",token_str);
+        assert(0);
+      }
       break;
     default:
       printf("wrong token type:%d\n", token_type);
