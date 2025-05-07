@@ -230,7 +230,7 @@ uint32_t value_compute(int token_type,char* token_str)
       value = strtoul(token_str, NULL, 16);
       break;
     case TK_REG:
-      value = isa_reg_str2val(token_str, NULL);
+      value = isa_reg_str2val(&token_str[1], NULL);
       break;
     default:
       printf("wrong token type:%d\n", token_type);
