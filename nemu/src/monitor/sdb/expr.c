@@ -274,6 +274,7 @@ word_t eval(int p, int q,bool* success) //p and q are the start and end index of
   else
   {
     int op = find_main_operator(p, q);
+    *success = true;
     printf ("op = %d,p=%d,q=%d\n", op,p,q);
     printf("main operater:%d\n",tokens[op].type);
     if (op == -1) //no operator
@@ -291,7 +292,6 @@ word_t eval(int p, int q,bool* success) //p and q are the start and end index of
     }
     if(success1)
     {
-      *success = true;
       switch(tokens[op].type)
       {
         case TK_ADD:return val1 + val2;
