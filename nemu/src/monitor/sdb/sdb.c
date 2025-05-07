@@ -106,7 +106,7 @@ static int cmd_p(char *args) {
   }
   result = expr(exprarg, &success);
   if (success) {
-    printf("result = %u\n",result);
+    printf("result = %u,%d\n",result,result);
     return 0;
   }
   return -1;
