@@ -25,7 +25,7 @@ define git_commit
 endef
 
 count:
-	find . -name "*.c" -o -name "*.h" -exec cat {} \; | grep -v "^$$" | wc -l
+	find . -name "*.[ch]" -exec cat {} \; | grep -v "^$$" | wc -l
 
 .git_commit:
 	-@while (test -e .git/index.lock); do sleep 0.1; done;               `# wait for other git instances`
