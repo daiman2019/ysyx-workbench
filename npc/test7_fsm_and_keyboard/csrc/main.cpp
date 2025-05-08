@@ -23,13 +23,18 @@ void sim_init()
     top = new Vtop;//update
     contextp->traceEverOn(true);
     top->trace(tfp,0);
-    tfp->open("mux41_waveform.vcd");//.vcd
+    tfp->open("test7_waveform.vcd");//.vcd
 }
 
 void sim_exit()
 {
     step_and_dump_wave();
     tfp->close();
+}
+static void single_cycle()
+{
+    dut.clk=0;dut.eval();
+    dut.clk=1;dut.eval();
 }
 /*void sim_run()
 {
@@ -76,11 +81,12 @@ int main() // for nvboard test
 {
   nvboard_bind_all_pins(&dut);
   nvboard_init();
-  
+  sim_init();
   while(1) {
     nvboard_update();
-    dut.eval();
+    single_cycle();
   }
   nvboard_quit();
+  sim_exit();
   return 0;
 }

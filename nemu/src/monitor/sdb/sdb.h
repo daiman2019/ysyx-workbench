@@ -17,7 +17,11 @@
 #define __SDB_H__
 
 #include <common.h>
-
+#define max_token_len 32
 word_t expr(char *e, bool *success);
+void delete_wp(int NO);
+void set_wp(char *expression);
+void print_all_wp() ;
+
 
 #endif

@@ -72,6 +72,12 @@ static int cmd_info(char *args) {
   if(strcmp(args, "r") == 0) {
     isa_reg_display();
   }
+  else if(strcmp(args, "w") == 0) {
+    print_all_wp();
+  }
+  else {
+    printf("Unknown command '%s'\n", args);
+  }
   return 0;
 }
 
@@ -86,9 +92,9 @@ static int cmd_x(char *args) {
     return -1;
   }
   int n = atoi(value_numbers);
-  uint32_t address = (uint32_t)strtoul(expr,NULL,16);
+  uint32_t address = (uint32_t)strtoul(expr,NULL,16);//0xdata->addr
   for(int i = 0; i < n; i++) {
-    printf("addr is %08x , value is %08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
+    printf("addr is 0x%08x , value is 0x%08x\n", address + i * 4,vaddr_read(address + i * 4, 4));
   }
   return 0;
 }
@@ -106,12 +112,38 @@ static int cmd_p(char *args) {
   }
   result = expr(exprarg, &success);
   if (success) {
-    printf("result = %u\n",result);
+    printf("result = %u,%d\n",result,result);
     return 0;
   }
   return -1;
 }
 
+static int cmd_w(char *args) {
+  printf("w: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  char *exprarg = strtok(args, " ");
+  if (exprarg == NULL) {
+    return -1;
+  }
+  set_wp(exprarg);
+  return 0;
+}
+static int cmd_d(char *args) {
+  printf("d: %s\n", args);
+  if (args == NULL) {
+    return -1;
+  }
+  char *value_numbers = strtok(args, " ");
+  if (value_numbers == NULL ) {
+    return -1;
+  }
+  int n = atoi(value_numbers);
+  //delete watchpoint n
+  delete_wp(n);
+  return 0;
+}
 
 static struct {
   const char *name;
@@ -123,13 +155,12 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* Add more commands */
-  { "si", "execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
-  { "info", "print the information of registers or watchpoints", cmd_info },
-  { "x", "examine memory and print the value",cmd_x },
-  { "p", "evaluate the expression", cmd_p },
- // { "w", "set watchpoint", cmd_w },
- // { "d", "delete watchpoint", cmd_d },
-
+  { "si", "si or si:N:execute N instructions step by step then pause,when N is not provided,the default is 1", cmd_si },
+  { "info", "info r/w:print the information of registers or watchpoints", cmd_info },
+  { "x", "x number start_addr:examine memory and print the value",cmd_x },
+  { "p", "p expr:evaluate the expression", cmd_p },
+  { "w", "w expr : set watchpoint", cmd_w },
+  { "d", "d N:delete number N watchpoint", cmd_d },
  // { NULL, NULL, NULL }
 
 };
@@ -164,12 +195,12 @@ void sdb_set_batch_mode() {
 }
 
 void sdb_mainloop() {
-  if (is_batch_mode) {
-    cmd_c(NULL);
-    return;
-  }
-
-  for (char *str; (str = rl_gets()) != NULL; ) {
+  // if (is_batch_mode) {
+  //   cmd_c(NULL);
+  //   return;
+  // }
+  for (char *str; (str = rl_gets()) != NULL; ) 
+  {
     char *str_end = str + strlen(str);
 
     /* extract the first token as the command */
@@ -190,8 +221,10 @@ void sdb_mainloop() {
 #endif
 
     int i;
-    for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(cmd, cmd_table[i].name) == 0) {
+    for (i = 0; i < NR_CMD; i ++) 
+    {
+      if (strcmp(cmd, cmd_table[i].name) == 0) 
+      {
         if (cmd_table[i].handler(args) < 0) { return; }
         break;
       }
@@ -218,6 +251,7 @@ void test_expr()
     word_t correct_result,result;
     size_t len;
     ssize_t read;
+    int count=0;
     while(1)
     {
       if(fscanf(fp,"%u",&correct_result)==-1) break;
@@ -227,12 +261,13 @@ void test_expr()
       result = expr(e, &success);
       if(success)
       {
+        count++;
         printf("result = %u,correct_result = %u\n",result,correct_result);
         assert(result == correct_result);
       }
     }
     fclose(fp);
     free(e);
-    printf("test expr success\n");
+    printf("count=%d,test expr success\n",count);
 }
 
