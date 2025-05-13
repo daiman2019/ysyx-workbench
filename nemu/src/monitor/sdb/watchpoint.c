@@ -123,9 +123,11 @@ int scan_wp()
       if (curr->is_active && new_value != curr->old_value) 
       {
         printf("Watchpoint %d: %s\n", curr->NO, curr->expr);
-        printf("Old value: %u, New value: %u\n", curr->old_value, new_value);
+        printf("Old value: %08x, New value: %08x\n", curr->old_value, new_value);
         curr->old_value = new_value; //update the old value
         val = 1;
+        nemu_state.state = NEMU_STOP;
+        break;
       }
     }
     curr = curr->next;
