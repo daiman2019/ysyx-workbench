@@ -151,6 +151,21 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
+config MTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable memory tracer"
+  default y
+
+config MTRACE_START
+  depends on MTRACE
+  hex "When tracing is enabled (tracing memory start)"
+  default 0x80000000
+
+config MTRACE_END
+  depends on MTRACE
+  hex "When tracing is disabled (tracing memory end)"
+  default 0xffffffff
+
 config WATCHPOINT
   bool "set watchpoint and trace"
   default y

@@ -1,6 +1,5 @@
 #include <am.h>
 #include <klib-macros.h>
-
 extern char _heap_start;
 int main(const char *args);
 
@@ -15,6 +14,8 @@ void putch(char ch) {
 }
 
 void halt(int code) {
+  asm volatile("ebreak");
+  //printf("npc: %s ",code==0? "HIT GOOD TRAP" :"HIT BAD TRAP");
   while (1);
 }
 

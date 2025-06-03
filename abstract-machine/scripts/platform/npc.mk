@@ -12,7 +12,8 @@ CFLAGS    += -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
 LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
-
+NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/npc-log.txt -i $(IMAGE).bin -e $(IMAGE).elf
+	
 MAINARGS_MAX_LEN = 64
 MAINARGS_PLACEHOLDER = The insert-arg rule in Makefile will insert mainargs here.
 CFLAGS += -DMAINARGS_MAX_LEN=$(MAINARGS_MAX_LEN) -DMAINARGS_PLACEHOLDER=\""$(MAINARGS_PLACEHOLDER)"\"
@@ -26,6 +27,12 @@ image: image-dep
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
 run: insert-arg
-	echo "TODO: add command here to run simulation"
+	cp $(IMAGE).bin $(NPC_HOME)/single_inst_cpu
+	#$(MAKE) -C $(NPC_HOME)/single_inst_cpu run ARGS=$(IMAGE).bin
+	$(MAKE) -C $(NPC_HOME)/single_inst_cpu run ARGS="$(NEMUFLAGS)"
 
+	#echo "TODO: add command here to run simulation"
+gdb: insert-arg
+	$(MAKE) -C $(NPC_HOME)/single_inst_cpu gdb ARGS="$(NEMUFLAGS)"
+	
 .PHONY: insert-arg

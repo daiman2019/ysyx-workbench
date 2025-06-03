@@ -22,10 +22,10 @@ const char *regs[] = {
   "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
-
+#define regs_number 32
 void isa_reg_display() {
     int i=0;
-    for(i=0;i<32;i++)
+    for(i=0;i<regs_number;i++)
     {
         printf("%s:hex is %08x(dec is %u)\n",reg_name(i),gpr(i),gpr(i));
     }
@@ -33,7 +33,7 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  for(int i=0;i<32;i++)
+  for(int i=0;i<regs_number;i++)
   {
     if(strcmp(s,reg_name(i))==0)
     {
