@@ -5,10 +5,11 @@
 #include <cstring>
 #include <cstdint>
 
-//#define NPC_ITRACE 
-//#define NPC_MTRACE 
-//#define NPC_FTRACE 
-//#define vcd_on 
+#define NPC_ITRACE 0
+#define NPC_MTRACE 0
+#define NPC_FTRACE 0
+#define vcd_on 0
+#define CONFIG_DEVICE
 
 #define NPC_RUNNING 0
 #define NPC_STOP    1

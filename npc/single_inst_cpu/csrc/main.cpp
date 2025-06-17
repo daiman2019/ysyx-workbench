@@ -103,12 +103,12 @@ void step_and_dump_wave()
 {
     top->clk=0;top->eval();
     contextp->timeInc(1);
-#ifdef vcd_on
+#if vcd_on
     tfp->dump(contextp->time());
 #endif
     top->clk=1;top->eval();
     contextp->timeInc(1);
-#ifdef vcd_on
+#if vcd_on
     tfp->dump(contextp->time());
 #endif
 }
@@ -116,7 +116,7 @@ void sim_init()
 {
     contextp = new VerilatedContext;
     top = new Vtop;//update
-#ifdef vcd_on
+#if vcd_on
     tfp = new VerilatedVcdC;
     contextp->traceEverOn(true);
     top->trace(tfp,0);
@@ -126,7 +126,7 @@ void sim_init()
 
 void sim_exit()
 {
-#ifdef vcd_on
+#if vcd_on
     tfp->close();
     delete tfp;
 #endif
@@ -157,7 +157,7 @@ void execute_step(uint32_t n)
     {
       top->clk=0;    
       top->eval();contextp->timeInc(1);
-#ifdef vcd_on
+#if vcd_on
       tfp->dump(contextp->time());
 #endif
       top->clk = 1;top->eval();
@@ -172,13 +172,16 @@ void execute_step(uint32_t n)
       top->instruction = pmem_read(top->pc,4);
       top->eval();
       contextp->timeInc(1);
-#ifdef vcd_on
+#if vcd_on
       tfp->dump(contextp->time());
 #endif
       next_pc = top->npc;
       cur_pc=top->pc;
 #if NPC_ITRACE
       npc_trace(cur_pc,top->instruction);
+#endif
+#ifdef CONFIG_DEVICE
+      device_update();
 #endif
       sim_steps++;
     }
@@ -203,11 +206,13 @@ int main(int argc, char *argv[]) //for verilator to check vcd waveform
     //     printf("argv[%d]=%s\n",i,argv[i]);
     // }
     init_mem();
+#ifdef CONFIG_DEVICE
     init_device();
+#endif
     parse_args(argc, argv);
     init_log(log_file);
     long img_size = load_img(img_file);
-#ifdef NPC_FTRACE
+#if NPC_FTRACE
     ftrace_elf_read(elf_file);
     printf("load_elf finish\n");
 #endif

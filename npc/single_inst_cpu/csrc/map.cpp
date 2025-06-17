@@ -23,7 +23,7 @@ uint8_t* new_space(int size)
 static bool check_bound(IOMap *map, uint32_t addr) 
 {
   if (map == NULL) {
-#ifdef NPC_MTRACE
+#if NPC_MTRACE
     log_write("address (0x%08x) is out of bound\n", addr);
 #endif
     return false;
@@ -36,7 +36,7 @@ static bool check_bound(IOMap *map, uint32_t addr)
     }
     else
     {
-#ifdef NPC_MTRACE
+#if NPC_MTRACE
       log_write("address (0x%08x) is out of bound {%s} [0x%08x, 0x%08x]\n",addr, map->name, map->low, map->high);
 #endif
       return false;
@@ -67,7 +67,8 @@ uint32_t map_read(uint32_t addr, int len, IOMap *map)
   return -1;
 }
 
-void map_write(uint32_t addr, int len, uint32_t data, IOMap *map) {
+void map_write(uint32_t addr, int len, uint32_t data, IOMap *map) 
+{
   assert(len >= 1 && len <= 8);
   if(check_bound(map, addr))
   {

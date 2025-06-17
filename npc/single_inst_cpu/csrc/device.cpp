@@ -29,7 +29,8 @@ void init_i8042();
 void send_key(uint8_t, bool);
 void vga_update_screen();
 
-void device_update() {
+void device_update() 
+{
   static uint64_t last = 0;
   uint64_t now = get_time();
   if (now - last < 1000000 / 60) {
@@ -82,6 +83,6 @@ void init_device()
 #ifdef CONFIG_I8042_DATA_MMIO
     init_i8042();
 #endif
-    printf("device initialize success!\n");
+    log_write("device initialize success!\n");
     return;
 }
