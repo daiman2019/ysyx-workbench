@@ -109,7 +109,11 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Parse arguments. */
   parse_args(argc, argv);
-
+  printf("argc=%d\n",argc);
+    for(int i=0;i<argc;i++)
+    {
+        printf("argv[%d]=%s\n",i,argv[i]);
+    }
   /* Set random seed. */
   init_rand();
 
@@ -136,7 +140,7 @@ void init_monitor(int argc, char *argv[]) {
 
   IFDEF(CONFIG_ITRACE, init_disasm());
   ringbuf_init();
-  IFDEF(CONFIG_ITRACE, ftrace_elf_read( elf_file));//read elf file
+  IFDEF(CONFIG_FTRACE, ftrace_elf_read( elf_file));//read elf file
   /* Display welcome message. */
   welcome();
 }

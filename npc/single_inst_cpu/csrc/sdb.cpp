@@ -1,20 +1,17 @@
 #include "sdb.h"
 #include <readline/readline.h>
 #include <readline/history.h>
-#include "svdpi.h"
-#include "Vtop__Dpi.h"
+#include "verilator_sim.h"
+#include "device.h"
+#include "memory.h"
 
-
-#define NR_CMD 4
-#define regs_number 32
+int reg_lists[regs_number];
 const char *regs[] = {
     "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
     "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
     "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
     "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
-  };
-void execute_step(uint32_t n);
-int reg_lists[regs_number];
+};
 static char* rl_gets() {
     static char *line_read = NULL;
     if (line_read) {
@@ -54,13 +51,16 @@ static int cmd_help(char *args) {
 void reg_values(int i,int reg_v)
 {
     reg_lists[i]=reg_v;
+    //printf("idx=%d,val=0x%08x\n",i,reg_v);
 }
 static int cmd_si(char *args) {
-    printf("si: %s\n", args);
     if (args == NULL) 
-        execute_step(1);
+    {   execute_step(1);
+    }
     else
-        execute_step(atoi(args));
+    {
+      execute_step(atoi(args));
+    }    
     return 0;
 }
 static int cmd_c(char *args) {
@@ -89,6 +89,11 @@ static int cmd_info(char *args) {
     }
     return 0;
 }
+static int cmd_q(char *args) {
+  printf("q: %s\n", args);
+  npc_state.state = NPC_QUIT;
+  return -1;
+}
 //scan memory
 static int cmd_x(char *args) {
     printf("x: %s\n", args);
@@ -102,13 +107,13 @@ static int cmd_x(char *args) {
     }
     int n_bytes = atoi(value_numbers);
     uint32_t start_addr = (uint32_t)strtoul(expr,NULL,16);//0xdata->addr
-    if(start_addr<0x80000000)
-    {
-        printf("wrong start addr\n");
-        return 0;
-    }
-    for(int i = 0; i < n_bytes; i++) {
-      log_write("addr is 0x%08x , value is 0x%08x\n", start_addr + i * 4,pmem[(start_addr + i * 4-0x80000000)>>2]);
+    // if(start_addr<0x80000000)
+    // {
+    //     printf("wrong start addr\n");
+    //     return 0;
+    // }
+    for(uint32_t addr = start_addr; addr < start_addr+n_bytes; addr = addr +4) {
+      log_write("addr is 0x%08x , value is 0x%08x\n", addr,pmem_read(addr,4));
     }
     return 0;
 }
@@ -121,13 +126,14 @@ void sdb_npc() {
     char *cmd = strtok(str, " ");
     if (cmd == NULL) { continue; }
 
-    /* treat the remaining string as the arguments,
-      * which may need further parsing
-      */
     char *args = cmd + strlen(cmd) + 1;
     if (args >= str_end) {
       args = NULL;
     }
+#ifdef CONFIG_DEVICE
+    extern void sdl_clear_event_queue();
+    sdl_clear_event_queue();
+#endif
     int i;
     for (i = 0; i < NR_CMD; i ++) 
     {

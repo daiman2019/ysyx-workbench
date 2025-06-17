@@ -2,17 +2,14 @@
 #include <unistd.h> //for lseek
 #include <fcntl.h> //for open
 #include "trace.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <cstring>
 #include "sdb.h"
-#include <stdio.h>
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
+#include "common.h"
 
 typedef struct {
     char      name[20];
-    paddr_t   addr;
+    uint32_t   addr;
     uint32_t  size;
     unsigned char info;
 } mySym;
@@ -73,13 +70,15 @@ void ftrace_elf_read(const char* elf_file)
 {
     Elf32_Ehdr elf_header;
     if(elf_file == NULL) return;
-    log_write("elf file:%s\n",elf_file);
+    log_write("ftrace_elf_read:elf file:%s\n",elf_file);
     int fd = open(elf_file,O_RDONLY);//只读模式打开
     if(fd<0) {printf("fail to read this elf file!");return;}  
     read_elf_header(fd,&elf_header);
     Elf32_Shdr section_hd_tbl[elf_header.e_shentsize* elf_header.e_shnum];
     read_elf_section_headers(fd,&elf_header,section_hd_tbl);
+    printf("read_elf_symbol_table begin\n");
     read_elf_symbol_table(fd,&elf_header,section_hd_tbl);
+    printf("read_elf_symbol_table finish\n");
     close(fd);
 }
 //追踪函数调用和函数返回
@@ -105,16 +104,16 @@ void trace_func_call(int pc,int target_addr)
     if(symb_tab==NULL) return;
     int symb_index = find_symb_func(target_addr,true);
     call_depth++;
-    printf("call function pc=0x%08x,target_addr=0x%08x\n",pc,target_addr);
+    //printf("call function pc=0x%08x,target_addr=0x%08x\n",pc,target_addr);
     log_write("0x%08x %*s:call[%s@ 0x%08x]\n", pc,call_depth," ",symb_index>0?symb_tab[symb_index].name:"???",target_addr);
 }
 //
 void trace_func_ret(int pc)
 {
-    printf("function ret\n");
+    //printf("function ret\n");
     if(symb_tab==NULL) return;
     int symb_index = find_symb_func(pc,false);
-    printf("call function pc=0x%08x\n",pc);
+    //printf("call function pc=0x%08x\n",pc);
     log_write("0x%08x %*s :ret[%s]\n", pc,call_depth," ",symb_index>0?symb_tab[symb_index].name:"???");
     call_depth--;
 }

@@ -45,7 +45,7 @@ __EXPORT void difftest_regcpy(CPU_state *dut, bool direction) {
     {
       dut->gpr[i] = cpu.gpr[i];
     }
-    dut->pc =  cpu.pc;
+    dut->pc = cpu.pc;
   }
   else
     assert(0);
@@ -53,7 +53,7 @@ __EXPORT void difftest_regcpy(CPU_state *dut, bool direction) {
 
 
 __EXPORT void difftest_exec(uint64_t n) {
-  execute(n);
+  cpu_exec(n);
 }
 
 __EXPORT void difftest_raise_intr(word_t NO) {
@@ -61,6 +61,7 @@ __EXPORT void difftest_raise_intr(word_t NO) {
 }
 
 __EXPORT void difftest_init(int port) {
+
   void init_mem();
   init_mem();
   /* Perform ISA dependent initialization. */

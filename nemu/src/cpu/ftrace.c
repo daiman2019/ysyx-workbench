@@ -98,7 +98,9 @@ void trace_func_call(vaddr_t pc,vaddr_t target_addr)
     if(symb_tab==NULL) return;
     int symb_index = find_symb_func(target_addr,true);
     call_depth++;
+#ifdef CONFIG_FTRACE
     log_write(FMT_PADDR "%*s:call[%s@" FMT_PADDR "]\n", pc,call_depth," ",symb_index>0?symb_tab[symb_index].name:"???",target_addr);
+#endif
 }
 //
 void trace_func_ret(vaddr_t pc)
@@ -106,7 +108,8 @@ void trace_func_ret(vaddr_t pc)
     if(symb_tab==NULL) return;
     int symb_index;
     symb_index = find_symb_func(pc,false);
-    char* name = symb_index>0?symb_tab[symb_index].name:"???"
-    log_write(FMT_PADDR "%*s :ret[%s]\n", pc,call_depth," ",name);
+#ifdef CONFIG_FTRACE
+    log_write(FMT_PADDR "%*s :ret[%s]\n", pc,call_depth," ",symb_index>0?symb_tab[symb_index].name:"???");
+#endif
     call_depth--;
 }

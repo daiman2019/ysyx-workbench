@@ -20,10 +20,16 @@ module RegisterFile #(ADDR_WIDTH = 1 ,DATA_WIDTH =1)(
     assign rdata2 = rf[raddr2];
     assign halt_ret = rf[10];
     import "DPI-C" function void reg_values(int i,int reg_v);
-    integer i;
-    always@(*)begin
-        for(i=0;i<31;i++)
-            reg_values(i,rf[i]);
+//    integer i;
+    // always@(*)begin
+    //     for(i=0;i<31;i++) begin
+    //         reg_values(i,rf[i]);
+    //     end
+    // end
+    always @(posedge clk) begin
+        if (wen && |waddr) begin
+            reg_values({{27{1'b0}},waddr},wdata);
+        end
     end
 
 endmodule

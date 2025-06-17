@@ -1,6 +1,4 @@
 #include "trace.h"
-#include <stdio.h>
-#include "sdb.h"
 char logbuf[128];
 void npc_trace(uint32_t pc,uint32_t instruction)
 {
@@ -13,5 +11,5 @@ void npc_trace(uint32_t pc,uint32_t instruction)
   }
 //   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 //   disassemble(p, logbuf + sizeof(logbuf) - p,pc, (uint8_t *)&instruction, 4);
-  log_write("%s\n", logbuf);
+  log_write("itrace:%s\n", logbuf);
 }

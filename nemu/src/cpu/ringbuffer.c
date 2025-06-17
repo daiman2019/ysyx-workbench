@@ -28,6 +28,7 @@ void ringbuf_write(vaddr_t pc,uint32_t inst)
 
 void ringbuf_show()
 {
+#ifdef CONFIG_ITRACE
   size_t start;
   char buf[256];
   char* p;
@@ -51,6 +52,6 @@ void ringbuf_show()
     //log_write("index=%ld,size=%ld,pc=%08x,inst=%08x\n", start,buf + sizeof(buf) - p,ring_trace.pc[start],ring_trace.inst[start]);
     disassemble(p, buf + sizeof(buf) - p,ring_trace.pc[start], (uint8_t *)&ring_trace.inst[start], 4);
     log_write("%s\n", buf);
-    
   }
+#endif
 }

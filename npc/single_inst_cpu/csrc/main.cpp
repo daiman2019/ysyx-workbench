@@ -1,17 +1,19 @@
-#include <verilated.h>
-#include <nvboard.h>
-#include <Vtop.h>
-#include <verilated_vcd_c.h> //vcd waveform trace
+#include "verilator_sim.h"
 #include <getopt.h>
 #include "svdpi.h"
 #include "Vtop__Dpi.h"
 #include "sdb.h"
 #include "trace.h"
+#include "device.h"
+//#include "diffTest.h"
+#include "memory.h"
+
 
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
 static char *img_file = NULL;
 static char *elf_file = NULL;
+static int difftest_port = 1234;
 FILE *log_fp = NULL;
 
 VerilatedContext* contextp=NULL;
@@ -21,14 +23,18 @@ static Vtop* top;
 static TOP_NAME dut;
 
 void nvboard_bind_all_pins(TOP_NAME* name);
+
+CPU_state npc_cpu_reg = {0};
+
 int finish_flag = 0;
-void ebreak ()
+void finish_sim()
 {
   finish_flag = 1;
 }
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
     {"log"      , required_argument, NULL, 'l'},
+    {"port"     , required_argument, NULL, 'p'},
     {"elf"      , required_argument, NULL, 'e'},
     {"img"      , required_argument, NULL, 'i'},
     {"diff"     , required_argument, NULL, 'd'},
@@ -36,9 +42,10 @@ static int parse_args(int argc, char *argv[]) {
     {0          , 0                , NULL,  0 },
   };
   int o;
-  while ( (o = getopt_long(argc, argv, "hl:d:e:i:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "hl:p:d:e:i:", table, NULL)) != -1) {
     switch (o) {
       case 'l': log_file = optarg; break;
+      case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'd': diff_so_file = optarg; break;
       case 'i': img_file = optarg; break;
       case 'e': elf_file = optarg; return 0;
@@ -48,6 +55,7 @@ static int parse_args(int argc, char *argv[]) {
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
         printf("\t-i,--img=FILE           input bin file\n");
         printf("\t-e,--elf=FILE           input elf file\n");
+        printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
         printf("\n");
         exit(0);
     }
@@ -78,54 +86,50 @@ static long load_img(const char *img_file) {
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
 
-  //printf("The image is %s, size = %ld\n", img_file, size);
-
+  printf("The image is %s, size = %ld\n", img_file, size);
   fseek(fp, 0, SEEK_SET);
-  int ret = fread(pmem, size, 1, fp);
+  int ret = fread(guest_to_host(MEM_START), size, 1, fp);
+  //int ret = fread(pmem, size, 1, fp);
   assert(ret == 1);
   // for(int i=0;i<size;i++)
   // {
   //   printf("%08x\n",pmem[i]);
   // }
-  //printf("read file close\n");
   fclose(fp);
   return size;
-}
-
-static uint32_t pmem_read(uint32_t addr) {
-    //log_write("addr = %08x\n",addr);
-    if(addr>=0x80000000)
-    {
-      uint32_t ret = pmem[(addr-0x80000000)>>2];
-      //log_write("inst = %08x\n",ret);
-      return ret;
-    }  
-    else 
-      return 0;
 }
 
 void step_and_dump_wave()
 {
     top->clk=0;top->eval();
     contextp->timeInc(1);
+#ifdef vcd_on
     tfp->dump(contextp->time());
+#endif
     top->clk=1;top->eval();
     contextp->timeInc(1);
+#ifdef vcd_on
     tfp->dump(contextp->time());
+#endif
 }
 void sim_init()
 {
     contextp = new VerilatedContext;
-    tfp = new VerilatedVcdC;
     top = new Vtop;//update
+#ifdef vcd_on
+    tfp = new VerilatedVcdC;
     contextp->traceEverOn(true);
     top->trace(tfp,0);
     tfp->open("single_core_test.vcd");//.vcd
+#endif
 }
 
 void sim_exit()
 {
+#ifdef vcd_on
     tfp->close();
+    delete tfp;
+#endif
     delete top;
     delete contextp;
 }
@@ -136,22 +140,50 @@ void reset(int n)
         step_and_dump_wave();
     top->rst = 0;
 }
+void update_npc_regs()
+{
+  for(int i=0;i<32;i++)
+  {
+    npc_cpu_reg.gpr[i] = reg_lists[i];
+  }
+}
+int sim_steps = 0;
+int cur_pc,next_pc;
 void execute_step(uint32_t n)
 {
   for(uint32_t i=0;i<n;i++)
   {
-    top->clk=0;
-    top->eval();contextp->timeInc(1);
-    tfp->dump(contextp->time());
-    top->clk = 1;top->eval();
-    top->instruction = pmem_read(top->pc);
-    top->eval();
-    contextp->timeInc(1);
-    tfp->dump(contextp->time());
-    //printf("top->result=%d\n",top->result);
-#ifdef NPC_ITRACE
-    npc_trace(top->pc,top->instruction);
+    if(finish_flag==0)
+    {
+      top->clk=0;    
+      top->eval();contextp->timeInc(1);
+#ifdef vcd_on
+      tfp->dump(contextp->time());
 #endif
+      top->clk = 1;top->eval();
+      if(sim_steps>=1)
+      {
+        update_npc_regs();
+        npc_cpu_reg.pc = next_pc;
+#ifdef DIFFTEST_ENABLE
+        difftest_step(cur_pc, next_pc);
+#endif
+      }
+      top->instruction = pmem_read(top->pc,4);
+      top->eval();
+      contextp->timeInc(1);
+#ifdef vcd_on
+      tfp->dump(contextp->time());
+#endif
+      next_pc = top->npc;
+      cur_pc=top->pc;
+#if NPC_ITRACE
+      npc_trace(cur_pc,top->instruction);
+#endif
+      sim_steps++;
+    }
+    else
+      return;
   }
 }
 void sim_run()
@@ -159,22 +191,32 @@ void sim_run()
     reset(2);
     while(finish_flag == 0)
     {
-      //execute_step(1);
       sdb_npc();
     }
 }
 
 int main(int argc, char *argv[]) //for verilator to check vcd waveform
 {
-    printf("argc=%d\n",argc);
-    for(int i=0;i<argc;i++)
-    {
-        printf("argv[%d]=%s\n",i,argv[i]);
-    }
+    // printf("argc=%d\n",argc);
+    // for(int i=0;i<argc;i++)
+    // {
+    //     printf("argv[%d]=%s\n",i,argv[i]);
+    // }
+    init_mem();
+    init_device();
     parse_args(argc, argv);
     init_log(log_file);
-    load_img(img_file);
+    long img_size = load_img(img_file);
+#ifdef NPC_FTRACE
     ftrace_elf_read(elf_file);
+    printf("load_elf finish\n");
+#endif
+#ifdef DIFFTEST_ENABLE
+    diff_so_file ="/home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/nemu/tools/spike-diff/build/riscv32-spike-so";
+    init_difftest(diff_so_file, img_size, difftest_port);
+#endif
+    //printf("in main sizeof pmem is %lx,pmem_addr %08x\n",sizeof(pmem),pmem);
+    //printf("in main end is %08x\n",pmem[CONFIG_MSIZE-4]);
     sim_init();
     sim_run();
     sim_exit();

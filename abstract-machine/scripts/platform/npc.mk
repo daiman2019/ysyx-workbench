@@ -5,8 +5,10 @@ AM_SRCS := riscv/npc/start.S \
            riscv/npc/input.c \
            riscv/npc/cte.c \
            riscv/npc/trap.S \
+		   riscv/npc/gpu.c \
            platform/dummy/vme.c \
-           platform/dummy/mpe.c
+           platform/dummy/mpe.c 
+
 
 CFLAGS    += -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
@@ -31,7 +33,6 @@ run: insert-arg
 	#$(MAKE) -C $(NPC_HOME)/single_inst_cpu run ARGS=$(IMAGE).bin
 	$(MAKE) -C $(NPC_HOME)/single_inst_cpu run ARGS="$(NEMUFLAGS)"
 
-	#echo "TODO: add command here to run simulation"
 gdb: insert-arg
 	$(MAKE) -C $(NPC_HOME)/single_inst_cpu gdb ARGS="$(NEMUFLAGS)"
 	

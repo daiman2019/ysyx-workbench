@@ -169,6 +169,16 @@ config MTRACE_END
 config WATCHPOINT
   bool "set watchpoint and trace"
   default y
+ 
+config DTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable device tracer"
+  default y
+
+config FTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Enable function call and return tracer"
+  default y
   
 config DIFFTEST
   depends on TARGET_NATIVE_ELF

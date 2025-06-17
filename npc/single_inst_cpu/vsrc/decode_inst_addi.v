@@ -4,56 +4,128 @@ module decode_inst_addi(
     output [4:0] rs2,
     output [4:0] rd,
     output reg [31:0] imm,
-    output [1:0] jal_or_jalr,
-    output reg [1:0] adder_left_opt,//0:src1,1:pc,other:0
-    output reg [1:0] adder_right_opt//0:imm,1:4,other:0
+    output [1:0] pc_jump,
+    output reg [1:0] left_opt,//0:src1,1:pc,2:imm 3:0
+    output reg [1:0] right_opt,//0:imm,1:4,2:src2,3:0
+    output [1:0] load_store_flag, //0:load 1:store 
+    output [3:0] wmask,
+    output reg_wen,
+    output mem_wen,
+    output [3:0] alu_opt,
+    output [2:0] inst_type,
+    output [2:0] func3,
+    output [6:0] func7
 );
 //rd = instruction[11:7] for R/I/U/J type
 //rs1 = instruction[19:15] for R/I/S/B type
 //rs2 = instruction[24:20] for R/S/B
-import "DPI-C" function void ebreak ();
+import "DPI-C" function void finish_sim ();
+wire Rtype,Itype,Stype,Btype,Utype,Jtype;
+wire lui,auipc;
 wire [6:0] opcode;
+wire I_immtype;
+wire csr;
 assign opcode = instruction[6:0];
 assign rs1 = instruction[19:15];
 assign rs2 = instruction[24:20];
 assign rd = instruction[11:7];
+assign func3 = instruction[14:12];
+//Rtype func7 rs2 rs1 func3 rd opcode
+assign Rtype = (opcode==7'b0110011)?1:0;
+assign func7 = instruction[31:25];
+//Itype imm rs1 func3 rd opcode
+assign load_store_flag = (opcode == 7'b0000011)?0: (opcode ==7'b0100011)?1:2;
+assign I_immtype = opcode == 7'b0010011;
+assign csr = opcode ==7'b1110011;
+assign Itype = (opcode ==7'b1100111)|(load_store_flag==0)|I_immtype|csr;//jalr load 
+//Stype imm rs2 rs1 func3 imm opcode
+assign Stype = load_store_flag==1;
+//Btype imm rs2 rs2 func3 imm opcode
+assign Btype = opcode == 7'b1100011;
+//Utype imm rd opcode
+assign lui = opcode == 7'b0110111;
+assign auipc = opcode ==7'b0010111;
+assign Utype = lui |auipc;
+//Jtype imm rd opcode only jal
+assign Jtype = opcode == 7'b1101111;//jal
+assign pc_jump = (opcode == 7'b1101111)?0: (opcode ==7'b1100111)?1:Btype?2:3;//0:jal 1:jarl 2:branch 3:others
+
+assign inst_type = (Btype)?0:(Rtype)?1:(Itype)?2:3;
+
 always @(*)begin
-    if(instruction == 32'h00100073)
-        ebreak();
+    if(instruction == 32'h00100073)//ebreak
+        finish_sim();
 end
-always @(*)begin
-    case(opcode)
-    7'b0010111:imm = {instruction[31:12],{12{1'b0}}}; //U type auipc
-    7'b0010011:imm = {{20{instruction[31]}},instruction[31:20]};//I type addi
-    7'b1101111:imm = {{11{instruction[31]}},instruction[31],instruction[19:12],instruction[20],instruction[30:21],1'b0};//j type jal
-    7'b1100111:imm = {{20{instruction[31]}},instruction[31:20]};//I type jalr
-    7'b0110111:imm = {instruction[31:12],{12{1'b0}}}; //U type lui
-    default: imm = 0;
-    endcase
-end
-assign jal_or_jalr = (opcode == 7'b1101111)?0: (opcode ==7'b1100111)?1:2;
+assign imm = ({32{Utype}} & {instruction[31:12],{12{1'b0}}} ) | 
+             ({32{Itype}} & {{20{instruction[31]}},instruction[31:20]}) |
+             ({32{Stype}} & {{20{instruction[31]}},instruction[31:25],instruction[11:7]})|
+             ({32{Jtype}} & {{12{instruction[31]}},instruction[19:12],instruction[20],instruction[30:21],1'b0})|
+             ({32{Btype}} & {{20{instruction[31]}},instruction[7],instruction[30:25],instruction[11:8],1'b0}) |
+             32'b0;
+
+assign mem_wen = Stype;
+assign reg_wen = ~Stype & ~Btype;
 //control signal generation for ALU
+assign wmask = Stype?(func3==3'b000)?4'b0001://sb
+                     (func3==3'b001)?4'b0011://sh
+                     (func3==3'b010)?4'b1111:4'b0000:4'b0000;//sw
 
-always @(*)begin
-    case(opcode)
-    7'b0010111:adder_left_opt = 2'b01; //U type auipc 
-    7'b0010011:adder_left_opt = 2'b00;//I type addi
-    7'b1101111:adder_left_opt = 2'b01;//j type jal
-    7'b1100111:adder_left_opt = 2'b01;//I type jalr
-    7'b0110111:adder_left_opt = 2'b10; //U type lui
-    default: adder_left_opt = 2'b00;
-    endcase
-end
+assign alu_opt = Rtype?(func3==3'b000)?(func7[5]==0)?0:1://add or sub
+                       (func3==3'b001)?8://sll src1<<src2
+                       (func3==3'b010)?6://slt (sword_t)src1 < (sword_t)src2 ? 1:0
+                       (func3==3'b011)?6://sltu src1 < src2 ? 1:0
+                       (func3==3'b100)?5://xor R(rd) = src1 ^ src2
+                       (func3==3'b101)?9://srl/sra,
+                       (func3==3'b110)?4://or,R(rd) = src1 | src2
+                       (func3==3'b111)?3:0://and,R(rd) = src1 & src2
+                 Btype?(func3==3'b000)?7://beq if(src1 == src2) s->dnpc = s->pc + imm
+                       (func3==3'b001)?7://bne if(src1 != src2) s->dnpc = s->pc + imm
+                       (func3==3'b100)?6://blt if((sword_t)src1 < (sword_t)src2) s->dnpc = s->pc + imm
+                       (func3==3'b101)?6://bge if((sword_t)src1 >= (sword_t)src2) s->dnpc = s->pc + imm
+                       (func3==3'b110)?6://bltu if(src1 < src2) s->dnpc = s->pc + imm
+                       (func3==3'b111)?6:0://bgeu if(src1 >= src2) s->dnpc = s->pc + imm
+                I_immtype?(func3==3'b000)?0://addi src1+imm
+                          (func3==3'b001)?8://slli sr1<<(imm&0x3f)
+                          (func3==3'b010)?6://slti (sword_t)src1<(sword_t)imm ? 1:0
+                          (func3==3'b011)?6://sltiu R(rd) = src1<imm ? 1:0 
+                          (func3==3'b100)?5://xori src1^imm
+                          (func3==3'b101)?9://srai srli
+                          (func3==3'b110)?4://ori src1|imm
+                          (func3==3'b111)?3:0://andi scr1&imm
+                (pc_jump==1)?0://add R(rd) = s->pc +4
+                load_store_flag==0?0://add R(rd) = Mr(src1+imm)
+                lui?0://R(rd)=imm+0
+                auipc?0://R(rd) = s->pc + imm
+                Stype?0:0;//src1+imm
 
-always @(*)begin
-    case(opcode)
-    7'b0010111:adder_right_opt = 2'b00; //U type auipc 
-    7'b0010011:adder_right_opt = 2'b00;//I type addi
-    7'b1101111:adder_right_opt = 2'b01;//j type jal
-    7'b1100111:adder_right_opt = 2'b01;//I type jalr
-    7'b0110111:adder_right_opt = 2'b00; //U type lui
-    default: adder_right_opt = 2'b00;
-    endcase
-end
+always @(*)begin//for Rtype
+    if(Rtype) begin //src1 src2
+        left_opt = 0;right_opt=2;
+    end
+    else if(Btype) begin //src1 src2
+        left_opt = 0;right_opt=2;
+    end
+    else if(I_immtype) begin // src1 imm
+        left_opt = 0;right_opt=0;
+    end
+    else if((pc_jump==2'b01)||(pc_jump==2'b00)) begin // pc 4
+        left_opt = 1;right_opt=1;
+    end
+    else if(load_store_flag==0) begin //src1 imm
+        left_opt = 0;right_opt=0;
+    end
+    else if(lui) begin //imm 0
+        left_opt =2;right_opt=3;
+    end
+    else if(auipc) begin //pc imm
+        left_opt =1;right_opt=0;
+    end
+    else if(Stype) begin //src1 imm
+        left_opt = 0;right_opt=0;
+    end
+    else begin
+        left_opt = 0;right_opt=0;
+    end
+    end
 
 endmodule
