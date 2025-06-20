@@ -39,6 +39,14 @@ static debug_module_config_t difftest_dm_config = {
 struct diff_context_t {
   word_t gpr[MUXDEF(CONFIG_RVE, 16, 32)];
   word_t pc;
+  word_t mstatus;//0x300
+  //word_t misa;//0x301
+ // word_t mie;//0x304
+  word_t mtvec;//0x305
+  //word_t mscratch;//0x340
+  word_t mepc;//0x341
+  word_t mcause;//0x342
+  //word_t mtval;//0x343
 };
 
 static sim_t* s = NULL;
@@ -54,20 +62,33 @@ void sim_t::diff_step(uint64_t n) {
   step(n);
 }
 
+//REF to DUT
 void sim_t::diff_get_regs(void* diff_context) {
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NR_GPR; i++) {
     ctx->gpr[i] = state->XPR[i];
   }
   ctx->pc = state->pc;
+  ctx->mstatus = p->get_csr(0x300);
+  //ctx->misa = p->get_csr(0x301);
+  //ctx->mie = p->get_csr(0x304);
+  ctx->mtvec = p->get_csr(0x305);
+  //ctx->mscratch = p->get_csr(0x340);
+  ctx->mepc = p->get_csr(0x341);
+  ctx->mcause = p->get_csr(0x342);
+  //ctx->mtval = p->get_csr(0x343);
 }
-
+//DUT to REF
 void sim_t::diff_set_regs(void* diff_context) {
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NR_GPR; i++) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
   state->pc = ctx->pc;
+  state->mstatus->write(ctx->mstatus);
+  state->mtvec->write(ctx->mtvec);
+  state->mepc->write(ctx->mepc);
+  state->mcause->write(ctx->mcause);
 }
 
 void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {

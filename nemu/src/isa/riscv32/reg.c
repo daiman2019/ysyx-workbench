@@ -29,7 +29,10 @@ void isa_reg_display() {
     {
         printf("%s:hex is %08x(dec is %u)\n",reg_name(i),gpr(i),gpr(i));
     }
-    
+    printf("%s:hex is %08x(dec is %u)\n","mstatus",cpu.CRSs.mstatus,cpu.CRSs.mstatus);
+    printf("%s:hex is %08x(dec is %u)\n","mtvec",cpu.CRSs.mtvec,cpu.CRSs.mtvec);
+    printf("%s:hex is %08x(dec is %u)\n","mepc",cpu.CRSs.mepc,cpu.CRSs.mepc);
+    printf("%s:hex is %08x(dec is %u)\n","mcause",cpu.CRSs.mcause,cpu.CRSs.mcause);
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

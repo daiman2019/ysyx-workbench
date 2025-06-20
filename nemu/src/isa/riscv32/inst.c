@@ -21,7 +21,32 @@
 void ringbuf_write(vaddr_t pc,uint32_t inst);
 void trace_func_call(vaddr_t pc,vaddr_t target_addr);
 void trace_func_ret(vaddr_t pc);
-
+uint32_t update_mstatus()
+{
+  
+  uint32_t mstatus = cpu.CRSs.mstatus;
+  //printf("before mret mstatus %08x\n",mstatus);
+  mstatus |= (0x1<<7);//MPIE=1;
+  mstatus &=~(0x3<<11);//MPP=0;
+  //printf("after mret mstatus %08x\n",mstatus);
+  return mstatus;
+}
+vaddr_t* csr(word_t imm)
+{
+  switch(imm)
+  {
+    case 0x300:return &(cpu.CRSs.mstatus);
+    //case 0x301:return &(cpu.CRSs.misa);
+    //case 0x304:return &(cpu.CRSs.mie);
+    case 0x305:return &cpu.CRSs.mtvec;
+    //case 0x340:return &cpu.CRSs.mscratch;
+    case 0x341:return &cpu.CRSs.mepc;
+    case 0x342:return &cpu.CRSs.mcause;
+    //case 0x343:return &cpu.CRSs.mtval;
+    default:panic("wrong csr addr:%08x\n",imm);
+  }
+}  
+#define CSR(imm) *csr(imm)
 #define R(i) gpr(i)
 #define Mr vaddr_read
 #define Mw vaddr_write
@@ -143,6 +168,11 @@ static int decode_exec(Decode *s) {
 
   INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw   , R, R(rd) = SEXT(src1 * src2,32));
 
+  //csr
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, R(rd) = CSR(imm);CSR(imm)|=src1);//csrr->csrrs
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, R(rd) = CSR(imm);CSR(imm)=src1);//csrrw
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , I, bool success;s->dnpc = isa_raise_intr(isa_reg_str2val("a7",&success), s->pc));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , R, s->dnpc = CSR(0x341);CSR(0x300)=update_mstatus());//pc=CSRs[mepc]
 
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   
