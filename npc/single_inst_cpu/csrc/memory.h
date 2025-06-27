@@ -4,7 +4,7 @@
 
 void init_mem();
 bool in_pmem(uint32_t addr);
-extern "C"{int pmem_read(int raddr,int len);}
+extern "C"{int pmem_read(int raddr,int len,int flag);}
 extern "C"{void pmem_write(int waddr,int wdata,int len);}
 uint8_t* guest_to_host(uint32_t paddr);
 uint32_t host_to_guest(uint8_t* vaddr);

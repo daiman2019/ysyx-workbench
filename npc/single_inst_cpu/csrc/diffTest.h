@@ -1,5 +1,5 @@
 #include "common.h"
-//#define DIFFTEST_ENABLE
+
 enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 extern int finish_flag;
 

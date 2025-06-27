@@ -54,6 +54,7 @@ void vga_update_screen() {
 }
 
 void init_vga() {
+#ifdef CONFIG_VGA_CTL_MMIO
   vgactl_port_base = (uint32_t *)new_space(8);
   vgactl_port_base[0] = (screen_width() << 16) | screen_height();
   add_mmio_map("vgactl", CONFIG_VGA_CTL_MMIO, vgactl_port_base, 8, NULL);
@@ -61,4 +62,5 @@ void init_vga() {
   add_mmio_map("vmem", CONFIG_FB_ADDR, vmem, screen_size(), NULL);
   init_screen();
   memset(vmem, 0, screen_size());
+#endif
 }

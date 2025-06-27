@@ -9,7 +9,8 @@ module ysyx_25050148_alu#(DATA_WIDTH = 32)(
     output alu_branch_flag);
 //opt: 
 //0000:add;0001:sub;0010 not;0011:and;0100:or;0101 xor;0110 src1<src2?;0111:src1==src2
-//1000:shift left,1001:shift right
+//1000:shift left,1001:shift right 
+//1111:do nothing
     wire carry_out,less_flag,equal_flag,zero_flag;
     wire [DATA_WIDTH-1:0] result;
     wire overflow;

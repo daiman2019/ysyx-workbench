@@ -113,7 +113,7 @@ static int cmd_x(char *args) {
     //     return 0;
     // }
     for(uint32_t addr = start_addr; addr < start_addr+n_bytes; addr = addr +4) {
-      log_write("addr is 0x%08x , value is 0x%08x\n", addr,pmem_read(addr,4));
+      log_write("addr is 0x%08x , value is 0x%08x\n", addr,pmem_read(addr,4,1));
     }
     return 0;
 }

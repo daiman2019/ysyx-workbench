@@ -30,11 +30,11 @@ assign read_data = (func3==3'b000)?{{24{rdata[7]}},rdata[7:0]}://lb
                    (func3==3'b100)?{{24{1'b0}},rdata[7:0]}://lbu
                    (func3==3'b101)?{{16{1'b0}},rdata[15:0]}://lhu
                    (func3==3'b110)?rdata:rdata;//lwu
-import "DPI-C" function int pmem_read(input int raddr,input int len);
+import "DPI-C" function int pmem_read(input int raddr,input int len,int flag);
 import "DPI-C" function void pmem_write(int waddr,int wdata,int len);
 always@(*) begin
     if(read_valid) begin
-        rdata = pmem_read(raddr,pmemread_len);
+        rdata = pmem_read(raddr,pmemread_len,2);
     end
     else begin
         rdata = 0;

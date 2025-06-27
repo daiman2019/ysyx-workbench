@@ -169,7 +169,7 @@ void execute_step(uint32_t n)
         difftest_step(cur_pc, next_pc);
 #endif
       }
-      top->instruction = pmem_read(top->pc,4);
+      top->instruction = pmem_read(top->pc,4,0);
       top->eval();
       contextp->timeInc(1);
 #if vcd_on
@@ -205,19 +205,19 @@ int main(int argc, char *argv[]) //for verilator to check vcd waveform
     // {
     //     printf("argv[%d]=%s\n",i,argv[i]);
     // }
+    parse_args(argc, argv);
+    init_log(log_file);
     init_mem();
 #ifdef CONFIG_DEVICE
     init_device();
 #endif
-    parse_args(argc, argv);
-    init_log(log_file);
     long img_size = load_img(img_file);
 #if NPC_FTRACE
     ftrace_elf_read(elf_file);
     printf("load_elf finish\n");
 #endif
 #ifdef DIFFTEST_ENABLE
-    diff_so_file ="/home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/nemu/tools/spike-diff/build/riscv32-spike-so";
+    diff_so_file ="/home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/npc/single_inst_cpu/riscv32-nemu-interpreter-so";
     init_difftest(diff_so_file, img_size, difftest_port);
 #endif
     //printf("in main sizeof pmem is %lx,pmem_addr %08x\n",sizeof(pmem),pmem);
@@ -225,6 +225,7 @@ int main(int argc, char *argv[]) //for verilator to check vcd waveform
     sim_init();
     sim_run();
     sim_exit();
+    printf("exec %d steps\n",sim_steps);
     printf("npc: %s \n",top->halt_ret==0? "HIT GOOD TRAP" :"HIT BAD TRAP");
     return top->halt_ret;
 }

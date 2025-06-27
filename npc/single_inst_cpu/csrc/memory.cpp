@@ -20,8 +20,9 @@ bool in_pmem(uint32_t addr)
     return (addr>=MEM_START)&&(addr<=MEM_END);
 }
 extern "C" {
-int pmem_read(int raddr,int len)
+int pmem_read(int raddr,int len,int flag)
 {
+log_write("mtrace flag = %d,",flag);
     if(in_pmem(raddr))
     {
         uint32_t pmem_ret = host_read(guest_to_host(raddr),len);
@@ -55,6 +56,11 @@ void pmem_write(int waddr,int wdata,int len)
     {
         mmio_write(waddr,len,wdata);
     }
+#if NPC_MTRACE
+    uint32_t write_data = pmem_read(waddr,len,4);
+    log_write("mtrace:after pmem write read data is %08x\n",write_data);
+#endif
+    
 }
 }
 

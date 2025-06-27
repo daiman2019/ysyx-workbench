@@ -3,9 +3,10 @@ module pc_update  #(ADDR_WIDTH =32,DATA_WIDTH=32)(
     input rst,
     input [31:0] instruction,
     input [DATA_WIDTH-1:0] offset,
-    input [1:0] jump_flag,
+    input [2:0] jump_flag,
     input [DATA_WIDTH-1:0] src1,
     input branch_or_not,
+    input [DATA_WIDTH-1:0] csr_pc,
     output reg [DATA_WIDTH-1:0] pc,
     output [DATA_WIDTH-1:0] npc
 );
@@ -16,11 +17,11 @@ wire [DATA_WIDTH-1:0] branch_pc;
 assign jal_pc = pc+offset;
 assign jalr_pc = (src1 + offset)&(32'hfffffffe);
 assign branch_pc = branch_or_not?(pc+offset):(pc + (ADDR_WIDTH>>3));
-MuxKeyWithDefault #(3, 2, 32) pc_result(
+MuxKeyWithDefault #(4, 3, 32) pc_result(
     .out(next_pc),
     .key(jump_flag),
     .default_out(pc + (ADDR_WIDTH>>3)),
-    .lut({2'b00,jal_pc,2'b01,jalr_pc,2'b10,branch_pc}));
+    .lut({3'b000,jal_pc,3'b001,jalr_pc,3'b010,branch_pc,3'b011,csr_pc}));
 always@(posedge clk) begin
     if(rst)
         pc<=32'h80000000;

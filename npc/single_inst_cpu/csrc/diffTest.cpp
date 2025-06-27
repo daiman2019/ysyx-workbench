@@ -108,7 +108,9 @@ void difftest_step(uint32_t pc, uint32_t npc) {
       is_skip_ref = false;
       return;
     }
+    log_write("DIFFTEST:before ref exec at pc = 0x%08x\n", pc);
     ref_difftest_exec(1);
+    log_write("DIFFTEST:after ref exec at pc = 0x%08x\n", pc);
     ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
     checkregs(&ref_r, pc);
 }

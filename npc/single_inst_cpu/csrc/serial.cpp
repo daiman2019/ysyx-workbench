@@ -13,13 +13,15 @@ static void serial_io_handler(uint32_t offset, int len, bool is_write) {
     /* We bind the serial port with the host stderr in NEMU. */
     case CH_OFFSET:
       if (is_write) serial_putc(serial_base[0]);
-      else printf("do not support read");
+      //else printf("do not support read");
       break;
     default: printf("do not support offset = %d", offset);
   }
 }
 
 void init_serial() {
+#ifdef CONFIG_SERIAL_MMIO
   serial_base = new_space(8);
   add_mmio_map("serial", CONFIG_SERIAL_MMIO, serial_base, 8, serial_io_handler);
+#endif
 }
