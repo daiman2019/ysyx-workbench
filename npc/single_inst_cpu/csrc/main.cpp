@@ -161,29 +161,29 @@ void execute_step(uint32_t n)
       tfp->dump(contextp->time());
 #endif
       top->clk = 1;top->eval();
-      if(sim_steps>=1)
+      if(top->difftest_en_t)
       {
         update_npc_regs();
         npc_cpu_reg.pc = next_pc;
 #ifdef DIFFTEST_ENABLE
         difftest_step(cur_pc, next_pc);
 #endif
+#if NPC_ITRACE
+      npc_trace(cur_pc,top->instruction);
+#endif
+        sim_steps++;
       }
-      top->instruction = pmem_read(top->pc,4,0);
-      top->eval();
+      //top->instruction = pmem_read(top->pc,4,0);
+      //top->eval();
       contextp->timeInc(1);
 #if vcd_on
       tfp->dump(contextp->time());
 #endif
       next_pc = top->npc;
       cur_pc=top->pc;
-#if NPC_ITRACE
-      npc_trace(cur_pc,top->instruction);
-#endif
 #ifdef CONFIG_DEVICE
       device_update();
 #endif
-      sim_steps++;
     }
     else
       return;
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) //for verilator to check vcd waveform
     printf("load_elf finish\n");
 #endif
 #ifdef DIFFTEST_ENABLE
-    diff_so_file ="/home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/npc/single_inst_cpu/riscv32-nemu-interpreter-so";
+    diff_so_file ="/home/daiman/Documents/dm/ysyx_gitcode/ysyx-workbench/npc/single_inst_cpu/riscv32-nemu-interpreter-so";//riscv32-nemu-interpreter-so
     init_difftest(diff_so_file, img_size, difftest_port);
 #endif
     //printf("in main sizeof pmem is %lx,pmem_addr %08x\n",sizeof(pmem),pmem);

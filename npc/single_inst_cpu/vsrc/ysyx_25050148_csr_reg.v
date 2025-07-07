@@ -1,4 +1,4 @@
-module csr_reg (
+module ysyx_25050148_csr_reg (
     input clk,
     input rst,
     input wen,
@@ -23,7 +23,7 @@ module csr_reg (
                                                     (csr_waddr2==12'h342)?3:7;
     assign raddr = (csr_raddr==12'h300) ? 0:
                                                     (csr_raddr==12'h305)?1:
-                                                    (csr_raddr==12'h341)?2:
+                                                    (csr_raddr==12'h341)?2://mepc
                                                     (csr_raddr==12'h342)?3:7;
     always @(posedge clk) begin
         if (rst)

@@ -26,21 +26,21 @@ always@(posedge clk) begin
     if(rst)
         pc<=32'h80000000;
     else
-        pc<= next_pc;
+        pc<=pc;
 end
 assign npc=next_pc;
 //for ftrace
-import "DPI-C" function void trace_func_ret(int pc_now);
-import "DPI-C" function void trace_func_call(int pc_now,int target_addr);
-always@(posedge clk)begin
-    if(jump_flag==0)
-        trace_func_call(pc,jal_pc);
-    else if(jump_flag==1 && instruction==32'h00008067)//ret
-        trace_func_ret(pc);
-    else if(jump_flag==1 && instruction!=32'h00008067)
-        trace_func_call(pc,jalr_pc);
-    else
-        ;
-end
+// import "DPI-C" function void trace_func_ret(int pc_now);
+// import "DPI-C" function void trace_func_call(int pc_now,int target_addr);
+// always@(posedge clk)begin
+//     if(jump_flag==0)
+//         trace_func_call(pc,jal_pc);
+//     else if(jump_flag==1 && instruction==32'h00008067)//ret
+//         trace_func_ret(pc);
+//     else if(jump_flag==1 && instruction!=32'h00008067)
+//         trace_func_call(pc,jalr_pc);
+//     else
+//         ;
+// end
 
 endmodule

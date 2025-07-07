@@ -10,7 +10,9 @@ Context* __am_irq_handle(Context *c) {
     //printf("in npc/cte mcause is:%d\n",c->mcause);
     switch (c->mcause) {
       case 0xb:
-      {ev.event = EVENT_YIELD;c->mepc += 4;}break;
+      {ev.event = EVENT_YIELD;
+       c->mepc += 4;
+      }break;
       default: ev.event = EVENT_ERROR; break;
     }
     //printf("in npc/cte event is:%d\n",ev.event);
@@ -46,7 +48,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg)
 
 void yield() {
 #ifdef __riscv_e
-  asm volatile("li a5, 0xb; ecall");//-1
+  asm volatile("li a5, 0xb; ecall");//a5 -1
 #else
   asm volatile("li a7, 0xb; ecall");//-1
 #endif

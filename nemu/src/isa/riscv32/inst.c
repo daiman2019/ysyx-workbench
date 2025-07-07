@@ -170,8 +170,8 @@ static int decode_exec(Decode *s) {
 
   //csr
   INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, R(rd) = CSR(imm);CSR(imm)|=src1;IFDEF(CONFIG_ETRACE,log_write("imm=%08x,csr=%08x\n",imm,CSR(imm))));//csrr->csrrs
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, R(rd) = CSR(imm);CSR(imm)=src1;IFDEF(CONFIG_ETRACE,log_write("imm=%08x,csr=%08x\n",imm,CSR(imm))));//csrrw
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , I, bool success;s->dnpc = isa_raise_intr(isa_reg_str2val("a7",&success), s->pc));
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, R(rd) = CSR(imm);CSR(imm)=src1;IFDEF(CONFIG_ETRACE,log_write("csrrw imm=%08x,csr=%08x\n",imm,CSR(imm))));//csrrw
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , I, bool success;MUXDEF(__riscv_e,s->dnpc = isa_raise_intr(isa_reg_str2val("a5",&success), s->pc),s->dnpc = isa_raise_intr(isa_reg_str2val("a7",&success), s->pc)));
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , R, s->dnpc = CSR(0x341);CSR(0x300)=update_mstatus();IFDEF(CONFIG_ETRACE,log_write("mret,dnpc = %08x,mstatus=%08x\n",s->dnpc,CSR(0x300))););//pc=CSRs[mepc]
 
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));

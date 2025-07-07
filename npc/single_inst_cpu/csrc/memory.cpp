@@ -22,7 +22,7 @@ bool in_pmem(uint32_t addr)
 extern "C" {
 int pmem_read(int raddr,int len,int flag)
 {
-log_write("mtrace flag = %d,",flag);
+//log_write("mtrace flag = %d,",flag);
     if(in_pmem(raddr))
     {
         uint32_t pmem_ret = host_read(guest_to_host(raddr),len);

@@ -60,9 +60,9 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 
     ref_difftest_init(port);
     ref_r.pc = MEM_START;
-    ref_difftest_memcpy(MEM_START, guest_to_host(MEM_START), img_size, DIFFTEST_TO_REF);
     npc_cpu_reg.pc = MEM_START;
     ref_difftest_regcpy(&npc_cpu_reg, DIFFTEST_TO_REF);
+    ref_difftest_memcpy(MEM_START, guest_to_host(MEM_START), img_size, DIFFTEST_TO_REF);
 }
 
 
@@ -89,7 +89,9 @@ static void checkregs(CPU_state *ref, uint32_t pc) {
 }
 
 void difftest_step(uint32_t pc, uint32_t npc) {
-    if (skip_dut_nr_inst > 0) {
+    if (skip_dut_nr_inst > 0) 
+    {
+      log_write("DIFFTEST:jump %d steps\n",skip_dut_nr_inst);
       ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
       if (ref_r.pc == npc) {
         skip_dut_nr_inst = 0;
@@ -108,9 +110,7 @@ void difftest_step(uint32_t pc, uint32_t npc) {
       is_skip_ref = false;
       return;
     }
-    log_write("DIFFTEST:before ref exec at pc = 0x%08x\n", pc);
     ref_difftest_exec(1);
-    log_write("DIFFTEST:after ref exec at pc = 0x%08x\n", pc);
     ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
     checkregs(&ref_r, pc);
 }

@@ -39,8 +39,7 @@ LDFLAGS +=-lreadline
 INCFLAGS = $(addprefix -I,$(INC_PATH))
 
 #CFLAGS
-CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
-
+CFLAGS += -g $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 
 $(shell mkdir -p $(BUILD_DIR))
 

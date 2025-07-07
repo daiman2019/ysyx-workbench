@@ -5,12 +5,12 @@
 #include <cstring>
 #include <cstdint>
 
-#define NPC_ITRACE 1
-#define NPC_MTRACE 1
+#define NPC_ITRACE 0
+#define NPC_MTRACE 0
 #define NPC_FTRACE 0
-#define vcd_on 1
+#define vcd_on 0
 #define CONFIG_DEVICE
-//#define DIFFTEST_ENABLE
+#define DIFFTEST_ENABLE
 
 #define NPC_RUNNING 0
 #define NPC_STOP    1

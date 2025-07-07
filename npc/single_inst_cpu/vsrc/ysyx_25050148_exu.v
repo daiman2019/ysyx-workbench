@@ -1,16 +1,28 @@
-module ysyx_25050148_alu#(DATA_WIDTH = 32)(
-    input [DATA_WIDTH-1:0] src1,
-    input [DATA_WIDTH-1:0] src2,
+module ysyx_25050148_exu#(DATA_WIDTH = 32)(
+    input [1:0] alu_left_opt,
+    input [1:0] alu_right_opt,
+    input [31:0] pc,
+    input [DATA_WIDTH-1:0] reg_src1,
+    input [DATA_WIDTH-1:0] reg_src2,
+    input [31:0] imm_data,
     input [3:0] opt,
+    input [2:0] pc_jump_flag,
+    input [31:0] csr_pc,
     input [2:0] inst_type,//0:Btype 1:Rtype 2:Itype
     input [2:0] func3,
     input [6:0] func7,
     output reg [DATA_WIDTH-1:0] alu_result,
-    output alu_branch_flag);
+    output [31:0] next_pc_addr);
+    
+wire [31:0] src1,src2;
+assign src1 = (alu_left_opt==0)?reg_src1:(alu_left_opt==1)?pc:(alu_left_opt==2)?imm_data:0;
+assign src2 = (alu_right_opt==0)?imm_data:(alu_right_opt==1)?4:(alu_right_opt==2)?reg_src2:0;
+//ALU
 //opt: 
 //0000:add;0001:sub;0010 not;0011:and;0100:or;0101 xor;0110 src1<src2?;0111:src1==src2
 //1000:shift left,1001:shift right 
 //1111:do nothing
+    wire alu_branch_flag;
     wire carry_out,less_flag,equal_flag,zero_flag;
     wire [DATA_WIDTH-1:0] result;
     wire overflow;
@@ -64,4 +76,16 @@ module ysyx_25050148_alu#(DATA_WIDTH = 32)(
             alu_result = 0;
         endcase
     end
+//pc addr calculation
+wire [DATA_WIDTH-1:0] jal_pc;
+wire [DATA_WIDTH-1:0] jalr_pc;
+wire [DATA_WIDTH-1:0] branch_pc;
+assign jal_pc = pc+imm_data;
+assign jalr_pc = (reg_src1 + imm_data)&(32'hfffffffe);
+assign branch_pc = alu_branch_flag?(pc + imm_data):(pc + 4);
+MuxKeyWithDefault #(4, 3, 32) pc_result(
+    .out(next_pc_addr),
+    .key(pc_jump_flag),
+    .default_out(pc + 4),
+    .lut({3'b000,jal_pc,3'b001,jalr_pc,3'b010,branch_pc,3'b011,csr_pc}));
 endmodule
