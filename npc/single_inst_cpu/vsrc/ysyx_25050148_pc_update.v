@@ -1,6 +1,4 @@
-module pc_update  #(ADDR_WIDTH =32,DATA_WIDTH=32)(
-    input clk,
-    input rst,
+module ysyx_25050148_pc_update  #(ADDR_WIDTH =32,DATA_WIDTH=32)(
     input [31:0] instruction,
     input [DATA_WIDTH-1:0] offset,
     input [2:0] jump_flag,
