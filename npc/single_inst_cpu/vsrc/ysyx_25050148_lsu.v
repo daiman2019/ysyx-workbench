@@ -14,7 +14,7 @@ module ysyx_25050148_lsu(
     output lsu_valid,//LSU模块发送数据有效
     output [31:0] mem_read_data);
 
-parameter idle=0,read_addr=1,read_data=2,write_addr=3,write_data=4,write_rsp=5;
+parameter idle=0,read_addr=1,read_data=2,write_addr=3,write_data=4,write_rsp=5,bypass=6;
 reg [2:0] state,next;
 wire arvalid,arready,rvalid,rready,awvalid,awready,wvalid,wready,bvalid,bready;
 reg [31:0] araddr,awaddr,wdata;
@@ -32,6 +32,8 @@ always@(*)begin
             next=read_addr;
         else if(exu_valid && (ls_flag==1))
             next=write_addr;
+        else if(exu_valid && (ls_flag==2))
+            next=bypass;
         else
             next=idle;
     end
@@ -65,13 +67,17 @@ always@(*)begin
         else
             next=write_rsp;
     end
+    bypass:
+        next=idle;
+    default:next=idle;
     endcase
 end
-
+assign lsu_ready=(state==idle);
+assign lsu_valid=(rvalid&rready)|(bvalid&&bready)|(state==bypass);
 assign arvalid=(state==read_addr);
 assign rready = (state==read_data);
 assign awvalid=(state==write_addr);
-assign wvalid=(state==write_data);
+assign wvalid= (state==write_data);
 assign bready = (state==write_rsp);
 always@(posedge clk)begin
     if(rst)

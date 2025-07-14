@@ -5,8 +5,8 @@ module ysyx_25050148_idu(
     input [31:0] instruction,
     input exu_ready,//EXU就绪
 
-    output idu_ready,//idu此时准备好接收指令
-    output idu_valid,//此时IDU发给EXU的数据有效
+    output reg idu_ready,//idu此时准备好接收指令
+    output reg idu_valid,//此时IDU发给EXU的数据有效
 
     output reg [4:0] rs1_r,
     output reg [4:0] rs2_r,
@@ -20,9 +20,10 @@ module ysyx_25050148_idu(
     output reg [1:0] mem_read_len_r,
     output reg mem_read_flag_r,
     output reg reg_wen_r,
-    output reg load_store_flag_r,//0:load 1:store 
+    output reg [1:0] load_store_flag_r,//0:load 1:store 
     output reg [11:0] csr_raddr_r,
     output reg csr_wen_r,
+    output reg [1:0] csr_wdata1_choice_r,
     output reg [11:0] csr_waddr1_r,
     output reg [11:0] csr_waddr2_r,
     output reg [3:0] alu_opt_r,
@@ -38,11 +39,18 @@ always@(*)begin
 end
 wire Rtype,Itype,Stype,Btype,Utype,Jtype;
 wire lui,auipc;
-wire [6:0] opcode;
+wire [6:0] opcode,func7;
 wire I_immtype,csr_type;
-wire [31:0] csr_mstatus;
+wire [31:0] csr_mstatus,imm;
 wire ecall,mret;
-wire read_reg_en;
+wire mem_read_flag,reg_wen,csr_wen;
+wire [1:0] load_store_flag,reg_data_flag,mem_read_len,csr_wdata1_choice;
+wire [4:0] rs1,rs2,rd;
+wire [2:0] pc_jump,inst_type,func3;
+wire [3:0] wmask,alu_opt;
+wire [11:0] csr_raddr,csr_waddr1,csr_waddr2;
+reg [1:0] left_opt,right_opt;
+
 // parameter idle=0,decode=1,send_to_exu=2,wait_exu_ready=3;
 // reg [1:0] state,next;
 // always@(posedge clk)begin
@@ -90,9 +98,13 @@ always@(posedge clk)begin
         idu_valid<=idu_valid;
     end
 end
+assign opcode = instruction[6:0];
+assign rd = instruction[11:7];
+assign rs2 = instruction[24:20];
 //Rtype func7 rs2 rs1 func3 rd opcode
 assign Rtype = (opcode==7'b0110011)?1:0;
 assign func7 = instruction[31:25];
+assign func3 = instruction[14:12];
 //Itype imm rs1 func3 rd opcode
 assign load_store_flag = (opcode == 7'b0000011)?0: (opcode ==7'b0100011)?1:2;
 assign I_immtype = opcode == 7'b0010011;
@@ -205,7 +217,10 @@ assign csr_wen = csr_type;
 assign csr_raddr = ecall?12'h305:mret?12'h341:instruction[31:20];
 assign csr_waddr1 = ecall?12'h342:mret?12'h342:instruction[31:20];
 assign csr_waddr2 = ecall?12'h341:0;
-
+assign csr_wdata1_choice = func3 == 3'b010 ? 0://(csr_rdata_t | src1)
+                    func3 == 3'b001 ? 1://src1
+                    ecall? 2 ://src1
+                    mret ? 3:0;//csr_mstatus
 always@(posedge clk)begin
     if(ifu_valid&idu_ready) begin//inst有效
         rs1_r               <=  rs1            ;
@@ -224,12 +239,12 @@ always@(posedge clk)begin
         csr_raddr_r         <=  csr_raddr      ;
         csr_wen_r           <=  csr_wen        ;
         csr_waddr1_r        <=  csr_waddr1     ;
+        csr_wdata1_choice_r <=  csr_wdata1_choice;
         csr_waddr2_r        <=  csr_waddr2     ;
         alu_opt_r           <=  alu_opt        ;
         inst_type_r         <=  inst_type      ;
         func3_r             <=  func3          ;
-        func7_r             <=  func7          ;
-        
+        func7_r             <=  func7          ;       
     end
 end
 

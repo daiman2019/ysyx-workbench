@@ -7,8 +7,7 @@ module ysyx_25050148_ifu#(ADDR_WIDTH = 32 ,DATA_WIDTH =32)(
     input [ADDR_WIDTH-1:0] next_pc,//exu_valid有效时，next_pc有效
     output reg ifu_valid,//ifu输出指令有效
     output reg [ADDR_WIDTH-1:0] pc,
-    output reg [DATA_WIDTH-1:0] inst,
-    output reg difftest_en
+    output reg [DATA_WIDTH-1:0] inst
 );
 //update pc and fetch inst from inst mem/sram
 //update pc
@@ -53,12 +52,6 @@ always@(posedge clk) begin
         pc<=next_pc;
     else
         pc<=pc;
-end
-always@(posedge clk) begin
-    if(pc!=next_pc)
-        difftest_en<=1;
-    else
-        difftest_en<=0;
 end
 always@(posedge clk) begin
     if(rst)

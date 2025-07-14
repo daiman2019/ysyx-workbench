@@ -18,8 +18,8 @@ module ysyx_25050148_exu#(DATA_WIDTH = 32)(
     input [6:0] idu_func7,//from idu
     output exu_ready,//EXU准备就绪，可以接收来自IDU的数据
     output exu_valid,//传输给LSU的数据有效
-    output reg [DATA_WIDTH-1:0] alu_result,
-    output [31:0] next_pc_addr);
+    output reg [DATA_WIDTH-1:0] exu_alu_out,
+    output reg [31:0] next_pc_addr_r);
 parameter idle=0,exu=1,exu_send=3;
 reg [1:0] state,next;
 reg [31:0] current_pc;
@@ -28,6 +28,8 @@ reg [1:0] idu_left_opt,idu_right_opt;
 reg [3:0] opt;
 reg [2:0] pc_jump_flag,inst_type,func3;
 reg [6:0] func7;
+reg [DATA_WIDTH-1:0] alu_result;
+wire [31:0] next_pc_addr;
 always@(posedge clk)begin
     if(rst)
         current_pc<=32'h80000000;
@@ -50,9 +52,9 @@ always@(posedge clk)begin
         func3<=0;
         func7<=0;
     end  
-    else if(idu_valid) begin
+    else if(idu_valid&&exu_ready) begin
         idu_left_opt<=alu_left_opt;
-        idu_right_opt<alu_right_opt;
+        idu_right_opt<=alu_right_opt;
         idu_out_src1<=reg_src1;
         idu_out_src2<=reg_src2;
         imm_data<=imm;
@@ -63,7 +65,7 @@ always@(posedge clk)begin
         func3<=idu_func3;
         func7<=idu_func7;
     end
-    else
+    else begin
         idu_left_opt<=idu_left_opt;
         idu_right_opt<=idu_right_opt;
         idu_out_src1<=idu_out_src1;
@@ -75,6 +77,7 @@ always@(posedge clk)begin
         inst_type<=inst_type;
         func3<=func3;
         func7<=func7;
+    end
 end
 always@(posedge clk)begin
     if(rst)
@@ -86,18 +89,18 @@ always@(*)begin
     case(state)
     idle:begin
         if(idu_valid)
-            next<=exu;
+            next=exu;
         else
-            next<=idle;
+            next=idle;
     end
     exu:begin
-        next<=exu_send;
+        next=exu_send;
     end
     exu_send:begin
         if(lsu_ready)
-            next<=idle;
+            next=idle;
         else
-            next<=exu_send;
+            next=exu_send;
     end
     endcase
 end
@@ -178,4 +181,18 @@ MuxKeyWithDefault #(4, 3, 32) pc_result(
     .key(pc_jump_flag),
     .default_out(current_pc + 4),
     .lut({3'b000,jal_pc,3'b001,jalr_pc,3'b010,branch_pc,3'b011,csr_pc}));
+reg pc_valid;
+always@(posedge clk)begin
+    pc_valid<=(idu_valid&exu_ready);
+end
+always@(posedge clk)begin
+    if(pc_valid) begin
+        next_pc_addr_r<=next_pc_addr;
+        exu_alu_out<= alu_result;
+    end
+    else begin
+        next_pc_addr_r<=next_pc_addr_r;
+        exu_alu_out<=exu_alu_out;
+    end
+end
 endmodule

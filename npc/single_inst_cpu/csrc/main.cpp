@@ -169,7 +169,7 @@ void execute_step(uint32_t n)
         difftest_step(cur_pc, next_pc);
 #endif
 #if NPC_ITRACE
-      npc_trace(cur_pc,top->instruction);
+      npc_trace(cur_pc,pmem_read(cur_pc,4,0));
 #endif
         sim_steps++;
       }
@@ -180,7 +180,7 @@ void execute_step(uint32_t n)
       tfp->dump(contextp->time());
 #endif
       next_pc = top->npc;
-      cur_pc=top->pc;
+      cur_pc=top->current_pc;
 #ifdef CONFIG_DEVICE
       device_update();
 #endif

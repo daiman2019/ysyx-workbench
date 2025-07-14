@@ -30,7 +30,7 @@ module ysyx_25050148_sram #(ADDR_WIDTH=32,DATA_WIDTH=32)
     input bready
 );
 reg [31:0] sram_mem [2**32-1:0];
-parameter IDLE = 0,READ_WAIT=1,READ_DATA =2,WRITE_ADDR=3,WRITE_DATA=4,WRITE_RSP=5;
+parameter IDLE = 0,READ_ADDR=1,READ_DATA =2,WRITE_ADDR=3,WRITE_DATA=4,WRITE_RSP=5;
 reg [2:0] state,next;
 reg [ADDR_WIDTH-1:0] read_addr,write_addr;
 reg [DATA_WIDTH-1:0] write_data;
@@ -61,17 +61,17 @@ always@(*)begin
     case(state)
         IDLE:begin
             if(arvalid)
-                next=READ_WAIT;
+                next=READ_ADDR;
             else if(awvalid)
                 next=WRITE_ADDR;
             else
                 next=IDLE;
         end
-        READ_WAIT:begin
-            if(arready)//读地址完成
+        READ_ADDR:begin
+            if(arready&&arvalid)//读地址完成
                 next=READ_DATA;
             else
-                next=READ_WAIT;
+                next=READ_ADDR;
         end
         READ_DATA:begin
             if(rvalid&rready) begin//读数据完成
@@ -84,17 +84,14 @@ always@(*)begin
                 next=READ_DATA;
         end
         WRITE_ADDR:begin
-            if(awready) begin//写地址完成
-                if(wvalid)
-                    next=WRITE_DATA;
-                else
-                    next=IDLE;
+            if(awready && awvalid) begin//写地址完成
+                next=WRITE_DATA;
             end
             else
                 next=WRITE_ADDR;
         end
         WRITE_DATA:begin
-            if(wready)
+            if(wready && wvalid)
                 next=WRITE_RSP;
             else
                 next=WRITE_DATA;
@@ -102,7 +99,7 @@ always@(*)begin
         WRITE_RSP:begin
             if(bvalid&bready) begin
                 if(arvalid)
-                    next=READ_WAIT;
+                    next=READ_ADDR;
                 else
                     next=IDLE;
             end
@@ -111,12 +108,22 @@ always@(*)begin
         end
     endcase
 end
+always@(posedge clk)begin
+    if(rst)
+        wready<=0;
+    else if(awready&awvalid)
+        wready<=1;
+    else if(wready&wvalid)
+        wready<=0;
+    else 
+        wready<=wready;
+end
 //AXI4-lite响应信号
-assign arready = (state==READ_WAIT);
+assign arready = (state==READ_ADDR);
 assign rvalid = (state==READ_DATA);
 assign rresp = 2'b00;//OK响应
 assign awready = (state==WRITE_ADDR);
-assign wready = (state==WRITE_DATA);
+//assign wready = (state==WRITE_DATA);
 assign bvalid = (state==WRITE_RSP);
 assign bresp = 2'b00;
 
