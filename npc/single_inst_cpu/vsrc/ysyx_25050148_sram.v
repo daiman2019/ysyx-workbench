@@ -29,8 +29,10 @@ module ysyx_25050148_sram #(ADDR_WIDTH=32,DATA_WIDTH=32)
     output [1:0] bresp,
     input bready
 );
+wire [5:0] delay=10;
+reg [5:0] read_cnt,write_cnt;
 reg [31:0] sram_mem [2**32-1:0];
-parameter IDLE = 0,READ_ADDR=1,READ_DATA =2,WRITE_ADDR=3,WRITE_DATA=4,WRITE_RSP=5;
+parameter IDLE = 0,READ_ADDR=1,READ_DATA =2,WRITE_ADDR=3,WRITE_DATA=4,WRITE_RSP=5,RD_DELAY=6,WR_DELAY=7;
 reg [2:0] state,next;
 reg [ADDR_WIDTH-1:0] read_addr,write_addr;
 reg [DATA_WIDTH-1:0] write_data;
@@ -40,6 +42,21 @@ always@(posedge clk)begin
         state<=IDLE;
     else
         state<=next;
+end
+always@(posedge clk)begin
+    if(rst) begin
+        read_cnt<=0;
+        write_cnt<=0;
+    end
+    else if(state==RD_DELAY) begin
+        read_cnt<=read_cnt+1;
+    end
+    else if(state==WR_DELAY) begin
+        write_cnt<=write_cnt+1;
+    end
+    else begin
+        read_cnt<=0;
+    end
 end
 always@(posedge clk)begin
     if(rst) begin
@@ -69,7 +86,7 @@ always@(*)begin
         end
         READ_ADDR:begin
             if(arready&&arvalid)//读地址完成
-                next=READ_DATA;
+                next=RD_DELAY;//READ_DATA
             else
                 next=READ_ADDR;
         end
@@ -83,6 +100,12 @@ always@(*)begin
             else
                 next=READ_DATA;
         end
+        RD_DELAY:begin
+            if(read_cnt==delay-1)
+                next=READ_DATA;
+            else
+                next=RD_DELAY;
+        end
         WRITE_ADDR:begin
             if(awready && awvalid) begin//写地址完成
                 next=WRITE_DATA;
@@ -92,9 +115,15 @@ always@(*)begin
         end
         WRITE_DATA:begin
             if(wready && wvalid)
-                next=WRITE_RSP;
+                next=WR_DELAY;//WRITE_RSP
             else
                 next=WRITE_DATA;
+        end
+        WR_DELAY:begin
+            if(write_cnt==delay-1)
+                next=WRITE_RSP;
+            else
+                next=WR_DELAY;
         end
         WRITE_RSP:begin
             if(bvalid&bready) begin
