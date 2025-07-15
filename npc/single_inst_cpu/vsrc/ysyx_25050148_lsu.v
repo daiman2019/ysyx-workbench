@@ -1,4 +1,4 @@
-module ysyx_25050148_lsu(
+module ysyx_25050148_lsu #(ADDR_WIDTH=32,DATA_WIDTH=32)(
     input clk,
     input rst,
     input exu_valid,//EXU模块发送数据有效
@@ -12,13 +12,37 @@ module ysyx_25050148_lsu(
     input [31:0] wdata_in,
     output lsu_ready,//LSU模块准备就绪
     output lsu_valid,//LSU模块发送数据有效
-    output [31:0] mem_read_data);
-
+    output [31:0] mem_read_data,
+    //AXI4-LITE INTERFACE
+    output arvalid,
+    output reg [ADDR_WIDTH-1:0] araddr,
+    output arprot,
+    input arready,
+    //读数据通道
+    input rvalid,
+    input [DATA_WIDTH-1:0] rdata,
+    input [1:0] rresp,
+    output rready,
+    //写地址通道
+    output awvalid,
+    output [ADDR_WIDTH-1:0] awaddr,
+    output awprot,
+    input awready,
+    //写数据通道
+    output wvalid,
+    output reg [DATA_WIDTH-1:0] wdata,
+    output [(DATA_WIDTH>>3)-1:0] wstrb,
+    input wready,
+    //写响应通道
+    input bvalid,
+    input [1:0] bresp,
+    output bready
+);
+assign arprot = 0;
+assign awprot = 0;
+assign wstrb = wmask;
 parameter idle=0,read_addr=1,read_data=2,write_addr=3,write_data=4,write_rsp=5,bypass=6;
 reg [2:0] state,next;
-wire arvalid,arready,rvalid,rready,awvalid,awready,wvalid,wready,bvalid,bready;
-reg [31:0] araddr,awaddr,wdata;
-wire [31:0] rdata;
 always@(posedge clk)begin
     if(rst)
         state<=idle;
@@ -104,35 +128,35 @@ always@(posedge clk)begin
         wdata<=wdata;
 end
 
-ysyx_25050148_sram #(32,32) lsu_sram(
-    .clk(clk),
-    .rst(rst),
-    //AXI4-lite
-    //读地址通道
-    .arvalid(arvalid),
-    .araddr(araddr),
-    .arprot(1'b0),
-    .arready(arready),
-    //读数据通道
-    .rvalid(rvalid),
-    .rdata(rdata),
-    .rresp(),
-    .rready(rready),
-    //写地址通道
-    .awvalid(awvalid),
-    .awaddr(awaddr),
-    .awprot(1'b0),
-    .awready(awready),
-    //写数据通道
-    .wvalid(wvalid),
-    .wdata(wdata),
-    .wstrb(wmask),
-    .wready(wready),
-    //写响应通道
-    .bvalid(bvalid),
-    .bresp(),
-    .bready(bready)
-);
+// ysyx_25050148_sram #(32,32) lsu_sram(
+//     .clk(clk),
+//     .rst(rst),
+//     //AXI4-lite
+//     //读地址通道
+//     .arvalid(arvalid),
+//     .araddr(araddr),
+//     .arprot(1'b0),
+//     .arready(arready),
+//     //读数据通道
+//     .rvalid(rvalid),
+//     .rdata(rdata),
+//     .rresp(),
+//     .rready(rready),
+//     //写地址通道
+//     .awvalid(awvalid),
+//     .awaddr(awaddr),
+//     .awprot(1'b0),
+//     .awready(awready),
+//     //写数据通道
+//     .wvalid(wvalid),
+//     .wdata(wdata),
+//     .wstrb(wmask),
+//     .wready(wready),
+//     //写响应通道
+//     .bvalid(bvalid),
+//     .bresp(),
+//     .bready(bready)
+// );
 assign mem_read_data = (read_len==0 && read_flag==1)?{{24{rdata[7]}},rdata[7:0]}://lb
                    (read_len==1 && read_flag==1)?{{16{rdata[15]}},rdata[15:0]}://lh
                    (read_len==2 && read_flag==1)?rdata://lw

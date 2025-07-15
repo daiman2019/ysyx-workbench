@@ -36,11 +36,28 @@ wire [11:0] csr_waddr2;
 wire [31:0] csr_wdata1;
 wire [31:0] csr_wdata2;
 wire [31:0] csr_rdata;
-
 reg rst_t=1,ifu_req;
 wire ifu_valid,idu_ready,idu_valid,exu_ready,exu_valid,lsu_ready,lsu_valid,wbu_ready,wbu_valid;
 wire write_reg_en,write_csr_en;
 wire [1:0] ls_flag;
+//for axi
+wire ifu_arvalid,ifu_arprot,ifu_arready,ifu_rvalid,ifu_rready,ifu_awvalid,ifu_awready,ifu_wvalid,ifu_wready,ifu_bvalid,ifu_bready;
+wire [31:0] ifu_araddr,ifu_awaddr;
+wire [DATA_WIDTH-1:0] ifu_rdata,ifu_wdata;
+wire [1:0] ifu_rresp,ifu_bresp;
+wire ifu_awprot;
+wire [(DATA_WIDTH>>3)-1:0] ifu_wstrb;
+wire lsu_arvalid,lsu_arprot,lsu_arready,lsu_rvalid,lsu_rready,lsu_awvalid,lsu_awprot,lsu_awready,lsu_wvalid,lsu_wready,lsu_bvalid,lsu_bready;
+wire [31:0] lsu_araddr,lsu_awaddr;
+wire [1:0] lsu_rresp,lsu_bresp;
+wire [DATA_WIDTH-1:0] lsu_rdata,lsu_wdata;
+wire [(DATA_WIDTH>>3)-1:0] lsu_wstrb;
+wire sram_arvalid,sram_arprot,sram_arready,sram_rvalid,sram_rready,sram_awvalid,sram_awready,sram_wvalid,sram_wready,sram_bvalid,sram_bready;
+wire [31:0] sram_araddr,sram_awaddr;
+wire [DATA_WIDTH-1:0] sram_rdata,sram_wdata;
+wire [1:0] sram_rresp,sram_bresp;
+wire [(DATA_WIDTH>>3)-1:0] sram_wstrb;
+wire sram_awprot;
 always@(posedge clk)begin
     rst_t<=rst;
 end
@@ -84,7 +101,31 @@ ysyx_25050148_ifu #(32,32) pipeline_ifu(
     .next_pc(next_pc_addr),
     .ifu_valid(ifu_valid),//ifu输出指令有效
     .pc(pc),
-    .inst(instruction)
+    .inst(instruction),
+    //AXI4-LITE INTERFACE
+    .arvalid(ifu_arvalid),
+    .araddr(ifu_araddr),
+    .arprot(ifu_arprot),
+    .arready(ifu_arready),
+    //读数据通道
+    .rvalid(ifu_rvalid),
+    .rdata(ifu_rdata),
+    .rresp(ifu_rresp),
+    .rready(ifu_rready),
+    //写地址通道
+    .awvalid(ifu_awvalid),
+    .awaddr(ifu_awaddr),
+    .awprot(ifu_awprot),
+    .awready(ifu_awready),
+    //写数据通道
+    .wvalid(ifu_wvalid),
+    .wdata(ifu_wdata),
+    .wstrb(ifu_wstrb),
+    .wready(ifu_wready),
+    //写响应通道
+    .bvalid(ifu_bvalid),
+    .bresp(ifu_bresp),
+    .bready(ifu_bready)
 );
 //指令译码IDU
 ysyx_25050148_idu pipeline_idu(
@@ -165,7 +206,7 @@ ysyx_25050148_exu#(32) pipeline_exu(
     .exu_alu_out(alu_result),
     .next_pc_addr_r(next_pc_addr));
 //LSU
-ysyx_25050148_lsu pipeline_lsu(
+ysyx_25050148_lsu #(32,32) pipeline_lsu(
     .clk(clk),
     .rst(rst_t),
     .exu_valid(exu_valid),//EXU模块发送数据有效
@@ -179,7 +220,32 @@ ysyx_25050148_lsu pipeline_lsu(
     .wdata_in(src2),//x[rs2] from idu
     .lsu_ready(lsu_ready),//LSU模块准备就绪
     .lsu_valid(lsu_valid),//LSU模块发送数据有效
-    .mem_read_data(mem_read_data));
+    .mem_read_data(mem_read_data),
+    //AXI4-LITE INTERFACE
+    .arvalid(lsu_arvalid),
+    .araddr(lsu_araddr),
+    .arprot(lsu_arprot),
+    .arready(lsu_arready),
+    //读数据通道
+    .rvalid(lsu_rvalid),
+    .rdata(lsu_rdata),
+    .rresp(lsu_rresp),
+    .rready(lsu_rready),
+    //写地址通道
+    .awvalid(lsu_awvalid),
+    .awaddr(lsu_awaddr),
+    .awprot(lsu_awprot),
+    .awready(lsu_awready),
+    //写数据通道
+    .wvalid(lsu_wvalid),
+    .wdata(lsu_wdata),
+    .wstrb(lsu_wstrb),
+    .wready(lsu_wready),
+    //写响应通道
+    .bvalid(lsu_bvalid),
+    .bresp(lsu_bresp),
+    .bready(lsu_bready)
+);
 //WBU
 ysyx_25050148_wbu pipeline_wbu(
     .clk(clk),
@@ -205,5 +271,115 @@ ysyx_25050148_wbu pipeline_wbu(
     .csr_wdata1_r(csr_wdata1),
     .csr_wdata2_r(csr_wdata2)
     );
+//axi arbiter
+ysyx_25050148_axi_arbiter #(32,32) pipeline_axi_arbiter(
+    .clk(clk),
+    .rst(rst_t),
+    //IFU master interface
+    //读地址通道
+    .ifu_arvalid(ifu_arvalid),
+    .ifu_araddr(ifu_araddr),
+    .ifu_arprot(ifu_arprot),
+    .ifu_arready(ifu_arready),
+    //读数据通道
+    .ifu_rvalid(ifu_rvalid),
+    .ifu_rdata(ifu_rdata),
+    .ifu_rresp(ifu_rresp),
+    .ifu_rready(ifu_rready),
+    //写地址通道
+    .ifu_awvalid(ifu_awvalid),
+    .ifu_awaddr(ifu_awaddr),
+    .ifu_awprot(ifu_awprot),
+    .ifu_awready(ifu_awready),
+    //写数据通道
+    .ifu_wvalid(ifu_wvalid),
+    .ifu_wdata(ifu_wdata),
+    .ifu_wstrb(ifu_wstrb),
+    .ifu_wready(ifu_wready),
+    //写响应通道
+    .ifu_bvalid(ifu_bvalid),
+    .ifu_bresp(ifu_bresp),
+    .ifu_bready(ifu_bready),
+    //LSU master interface
+    .lsu_arvalid(lsu_arvalid),
+    .lsu_araddr(lsu_araddr),
+    .lsu_arprot(lsu_arprot),
+    .lsu_arready(lsu_arready),
+    //读数据通道
+    .lsu_rvalid(lsu_rvalid),
+    .lsu_rdata(lsu_rdata),
+    .lsu_rresp(lsu_rresp),
+    .lsu_rready(lsu_rready),
+    //写地址通道
+    .lsu_awvalid(lsu_awvalid),
+    .lsu_awaddr(lsu_awaddr),
+    .lsu_awprot(lsu_awprot),
+    .lsu_awready(lsu_awready),
+    //写数据通道
+    .lsu_wvalid(lsu_wvalid),
+    .lsu_wdata(lsu_wdata),
+    .lsu_wstrb(lsu_wstrb),
+    .lsu_wready(lsu_wready),
+    //写响应通道
+    .lsu_bvalid(lsu_bvalid),
+    .lsu_bresp(lsu_bresp),
+    .lsu_bready(lsu_bready),
+    //sram slave interface
+    //读地址通道
+    .sram_arvalid(sram_arvalid),
+    .sram_araddr(sram_araddr),
+    .sram_arprot(sram_arprot),
+    .sram_arready(sram_arready),
+    //读数据通道
+    .sram_rvalid(sram_rvalid),
+    .sram_rdata(sram_rdata),
+    .sram_rresp(sram_rresp),
+    .sram_rready(sram_rready),
+    //写地址通道
+    .sram_awvalid(sram_awvalid),
+    .sram_awaddr(sram_awaddr),
+    .sram_awprot(sram_awprot),
+    .sram_awready(sram_awready),
+    //写数据通道
+    .sram_wvalid(sram_wvalid),
+    .sram_wdata(sram_wdata),
+    .sram_wstrb(sram_wstrb),
+    .sram_wready(sram_wready),
+    //写响应通道
+    .sram_bvalid(sram_bvalid),
+    .sram_bresp(sram_bresp),
+    .sram_bready(sram_bready)
+);
+//sram
+ysyx_25050148_sram #(32,32) pipeline_sram(
+    .clk(clk),
+    .rst(rst_t),
+    //AXI4-lite
+    //读地址通道
+    .arvalid(sram_arvalid),
+    .araddr(sram_araddr),
+    .arprot(sram_arprot),
+    .arready(sram_arready),
+    //读数据通道
+    .rvalid(sram_rvalid),
+    .rdata(sram_rdata),
+    .rresp(sram_rresp),
+    .rready(sram_rready),
+    //写地址通道
+    .awvalid(sram_awvalid),
+    .awaddr(sram_awaddr),
+    .awprot(sram_awprot),
+    .awready(sram_awready),
+    //写数据通道
+    .wvalid(sram_wvalid),
+    .wdata(sram_wdata),
+    .wstrb(sram_wstrb),
+    .wready(sram_wready),
+    //写响应通道
+    .bvalid(sram_bvalid),
+    .bresp(sram_bresp),
+    .bready(sram_bready)
+);
+
 
 endmodule

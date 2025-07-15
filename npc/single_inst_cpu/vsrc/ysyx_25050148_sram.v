@@ -29,13 +29,13 @@ module ysyx_25050148_sram #(ADDR_WIDTH=32,DATA_WIDTH=32)
     output [1:0] bresp,
     input bready
 );
-wire [5:0] delay=10;
+wire [5:0] delay=2;
 reg [5:0] read_cnt,write_cnt;
 reg [31:0] sram_mem [2**32-1:0];
 parameter IDLE = 0,READ_ADDR=1,READ_DATA =2,WRITE_ADDR=3,WRITE_DATA=4,WRITE_RSP=5,RD_DELAY=6,WR_DELAY=7;
 reg [2:0] state,next;
 reg [ADDR_WIDTH-1:0] read_addr,write_addr;
-reg [DATA_WIDTH-1:0] write_data;
+// reg [(DATA_WIDTH>>3)-1] write_len;
 wire [31:0] write_len;
 always@(posedge clk)begin
     if(rst)
@@ -56,6 +56,7 @@ always@(posedge clk)begin
     end
     else begin
         read_cnt<=0;
+        write_cnt<=0;
     end
 end
 always@(posedge clk)begin
@@ -66,9 +67,15 @@ always@(posedge clk)begin
     else begin
         if(arvalid&arready)
             read_addr<=araddr;
-        if(wvalid&wready) begin
+        if(awvalid&awready) begin
             write_addr<=awaddr;
-            write_data<=wdata;
+            // write_data<=wdata;
+            // if(wstrb==4'b0001)
+            //     write_len<=1;
+            // else if(wstrb==4'b0011)
+            //     write_len<=2;
+            // else
+            //     write_len<=4;
         end 
     end
 end
@@ -166,7 +173,7 @@ always@(*)begin
         rdata = 0;
 end
 always@(posedge clk)begin
-    if(bvalid&bready)
-        pmem_write(write_addr,write_data,write_len);
+    if(wvalid&wready)
+        pmem_write(write_addr,wdata,write_len);
 end
 endmodule

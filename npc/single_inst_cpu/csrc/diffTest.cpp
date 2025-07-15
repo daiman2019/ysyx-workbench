@@ -83,9 +83,11 @@ bool isa_difftest_checkregs(CPU_state *ref_r, uint32_t pc) //ref is nemu dut is 
 
 static void checkregs(CPU_state *ref, uint32_t pc) {
   if (!isa_difftest_checkregs(ref, pc))
-    //finish_sim();
+  {  //finish_sim();
     finish_flag=1;
     npc_state.state = NPC_ABORT;
+    printf("difftest wrong\n");
+  }
 }
 
 void difftest_step(uint32_t pc, uint32_t npc) {

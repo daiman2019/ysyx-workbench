@@ -7,15 +7,36 @@ module ysyx_25050148_ifu#(ADDR_WIDTH = 32 ,DATA_WIDTH =32)(
     input [ADDR_WIDTH-1:0] next_pc,//exu_valid有效时，next_pc有效
     output reg ifu_valid,//ifu输出指令有效
     output reg [ADDR_WIDTH-1:0] pc,
-    output reg [DATA_WIDTH-1:0] inst
+    output reg [DATA_WIDTH-1:0] inst,
+    //AXI4-LITE INTERFACE
+    output arvalid,
+    output [ADDR_WIDTH-1:0] araddr,
+    output arprot,
+    input arready,
+    //读数据通道
+    input rvalid,
+    input [DATA_WIDTH-1:0] rdata,
+    input [1:0] rresp,
+    output rready,
+    //写地址通道
+    output awvalid,
+    output [ADDR_WIDTH-1:0] awaddr,
+    output awprot,
+    input awready,
+    //写数据通道
+    output wvalid,
+    output [DATA_WIDTH-1:0] wdata,
+    output [(DATA_WIDTH>>3)-1:0] wstrb,
+    input wready,
+    //写响应通道
+    input bvalid,
+    input [1:0] bresp,
+    output bready
 );
 //update pc and fetch inst from inst mem/sram
 //update pc
 reg [1:0] state,next;
 parameter idle=0,fetch_addr=1,fetch_data=2;
-wire arvalid,arready,rready,rvalid;
-wire [31:0] fetch_inst;
-reg [31:0] read_addr;
 always@(posedge clk) begin
     if(rst)
         state<=idle;
@@ -55,18 +76,18 @@ always@(posedge clk) begin
 end
 always@(posedge clk) begin
     if(rst)
-        read_addr<=32'd0;
+        araddr<=32'd0;
     else if(ifu_req)
-        read_addr<=pc;
+        araddr<=pc;
     else
-        read_addr<=read_addr;
+        araddr<=araddr;
 end
 assign arvalid = (state==fetch_addr);
 assign rready = (state==fetch_data);
 //assign ifu_valid = rvalid&&rready;
 always@(posedge clk)begin
     if(rvalid&&rready) begin
-        inst<=fetch_inst;
+        inst<=rdata;
         ifu_valid<=1;
     end
     else if(idu_ready) begin
@@ -78,36 +99,44 @@ always@(posedge clk)begin
         ifu_valid<=ifu_valid;
     end
 end
-//assign inst = (ifu_valid)?fetch_inst:32'd0;
+assign arprot = 0;
+// not use write channels
+assign awvalid = 1'b0;
+assign awaddr = 0;
+assign awprot = 0;
+assign wvalid = 0;
+assign wdata = 0;
+assign wstrb = 0;
+assign bready =0;
 //fetch inst form inst mem
-ysyx_25050148_sram #(32,32) inst_sram(
-    .clk(clk),
-    .rst(rst),
-    //AXI4-lite
-    //读地址通道
-    .arvalid(arvalid),
-    .araddr(read_addr),
-    .arprot(1'b0),
-    .arready(arready),
-    //读数据通道
-    .rvalid(rvalid),
-    .rdata(fetch_inst),
-    .rresp(),
-    .rready(rready),
-    //写地址通道
-    .awvalid(1'b0),
-    .awaddr(32'd0),
-    .awprot(1'b0),
-    .awready(),
-    //写数据通道
-    .wvalid(1'b0),
-    .wdata(32'd0),
-    .wstrb(0),
-    .wready(),
-    //写响应通道
-    .bvalid(),
-    .bresp(),
-    .bready(1'b0)
-);
+// ysyx_25050148_sram #(32,32) inst_sram(
+//     .clk(clk),
+//     .rst(rst),
+//     //AXI4-lite
+//     //读地址通道
+//     .arvalid(arvalid),
+//     .araddr(read_addr),
+//     .arprot(1'b0),
+//     .arready(arready),
+//     //读数据通道
+//     .rvalid(rvalid),
+//     .rdata(fetch_inst),
+//     .rresp(),
+//     .rready(rready),
+//     //写地址通道
+//     .awvalid(1'b0),
+//     .awaddr(32'd0),
+//     .awprot(1'b0),
+//     .awready(),
+//     //写数据通道
+//     .wvalid(1'b0),
+//     .wdata(32'd0),
+//     .wstrb(0),
+//     .wready(),
+//     //写响应通道
+//     .bvalid(),
+//     .bresp(),
+//     .bready(1'b0)
+// );
 endmodule
 
