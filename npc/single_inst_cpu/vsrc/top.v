@@ -52,12 +52,27 @@ wire [31:0] lsu_araddr,lsu_awaddr;
 wire [1:0] lsu_rresp,lsu_bresp;
 wire [DATA_WIDTH-1:0] lsu_rdata,lsu_wdata;
 wire [(DATA_WIDTH>>3)-1:0] lsu_wstrb;
+//axi4-lite sram interface
 wire sram_arvalid,sram_arprot,sram_arready,sram_rvalid,sram_rready,sram_awvalid,sram_awready,sram_wvalid,sram_wready,sram_bvalid,sram_bready;
 wire [31:0] sram_araddr,sram_awaddr;
 wire [DATA_WIDTH-1:0] sram_rdata,sram_wdata;
 wire [1:0] sram_rresp,sram_bresp;
 wire [(DATA_WIDTH>>3)-1:0] sram_wstrb;
 wire sram_awprot;
+//axi4-lite uart interface
+wire device_arvalid,device_arprot,device_arready,device_rvalid,device_rready,device_awvalid,device_awready,device_wvalid,device_wready,device_bvalid,device_bready;
+wire [31:0] device_araddr,device_awaddr;
+wire [DATA_WIDTH-1:0] device_rdata,device_wdata;
+wire [1:0] device_rresp,device_bresp;
+wire [(DATA_WIDTH>>3)-1:0] device_wstrb;
+wire device_awprot;
+//axi4-lite arbiter slave interface
+wire s_axi_arvalid,s_axi_arprot,s_axi_arready,s_axi_rvalid,s_axi_rready,s_axi_awvalid,s_axi_awready,s_axi_wvalid,s_axi_wready,s_axi_bvalid,s_axi_bready;
+wire [31:0] s_axi_araddr,s_axi_awaddr;
+wire [DATA_WIDTH-1:0] s_axi_rdata,s_axi_wdata;
+wire [1:0] s_axi_rresp,s_axi_bresp;
+wire [(DATA_WIDTH>>3)-1:0] s_axi_wstrb;
+wire s_axi_awprot;
 always@(posedge clk)begin
     rst_t<=rst;
 end
@@ -186,6 +201,7 @@ ysyx_25050148_csr_reg csr_regs(
 ysyx_25050148_exu#(32) pipeline_exu(
     .clk(clk),
     .rst(rst_t),
+    .instruction(instruction),
     .idu_valid(idu_valid),
     .lsu_ready(lsu_ready),
     .ifu_valid(ifu_valid),
@@ -330,9 +346,6 @@ ysyx_25050148_wbu pipeline_wbu(
     .s_axi_rvalid(sram_rvalid),
     .s_axi_rready(sram_rready)
 );*/
-
-
-
 ysyx_25050148_axi_arbiter #(32,32) pipeline_axi_arbiter(
     .clk(clk),
     .rst(rst_t),
@@ -387,29 +400,133 @@ ysyx_25050148_axi_arbiter #(32,32) pipeline_axi_arbiter(
     .lsu_bready(lsu_bready),
     //sram slave interface
     //读地址通道
-    .sram_arvalid(sram_arvalid),
-    .sram_araddr(sram_araddr),
-    .sram_arprot(sram_arprot),
-    .sram_arready(sram_arready),
+    .s_axi_arvalid(s_axi_arvalid),
+    .s_axi_araddr(s_axi_araddr),
+    .s_axi_arprot(s_axi_arprot),
+    .s_axi_arready(s_axi_arready),
     //读数据通道
-    .sram_rvalid(sram_rvalid),
-    .sram_rdata(sram_rdata),
-    .sram_rresp(sram_rresp),
-    .sram_rready(sram_rready),
+    .s_axi_rvalid(s_axi_rvalid),
+    .s_axi_rdata(s_axi_rdata),
+    .s_axi_rresp(s_axi_rresp),
+    .s_axi_rready(s_axi_rready),
     //写地址通道
-    .sram_awvalid(sram_awvalid),
+    .s_axi_awvalid(s_axi_awvalid),
+    .s_axi_awaddr(s_axi_awaddr),
+    .s_axi_awprot(s_axi_awprot),
+    .s_axi_awready(s_axi_awready),
+    //写数据通道
+    .s_axi_wvalid(s_axi_wvalid),
+    .s_axi_wdata(s_axi_wdata),
+    .s_axi_wstrb(s_axi_wstrb),
+    .s_axi_wready(s_axi_wready),
+    //写响应通道
+    .s_axi_bvalid(s_axi_bvalid),
+    .s_axi_bresp(s_axi_bresp),
+    .s_axi_bready(s_axi_bready)
+);
+//xbar interconnect
+ysyx_25050148_xbar pipeline_xbar(
+    .clk(clk),
+    .rst(rst_t),
+    // Slave Interface from arbiter
+    .s_axi_awaddr(s_axi_awaddr),
+    .s_axi_awprot(s_axi_awprot),
+    .s_axi_awvalid(s_axi_awvalid),
+    .s_axi_awready(s_axi_awready),
+    .s_axi_wdata(s_axi_wdata),
+    .s_axi_wstrb(s_axi_wstrb),
+    .s_axi_wvalid(s_axi_wvalid),
+    .s_axi_wready(s_axi_wready),
+
+    .s_axi_bresp(s_axi_bresp),
+    .s_axi_bvalid(s_axi_bvalid),
+    .s_axi_bready(s_axi_bready),
+
+    .s_axi_araddr(s_axi_araddr),
+    .s_axi_arprot(s_axi_arprot),
+    .s_axi_arvalid(s_axi_arvalid),
+    .s_axi_arready(s_axi_arready),
+    .s_axi_rdata(s_axi_rdata),
+    .s_axi_rresp(s_axi_rresp),
+    .s_axi_rvalid(s_axi_rvalid),
+    .s_axi_rready(s_axi_rready),
+    //slave interface to device
+    .device_awaddr(device_awaddr),
+    .device_awprot(device_awprot),
+    .device_awvalid(device_awvalid),
+    .device_awready(device_awready),
+
+    .device_wdata(device_wdata),
+    .device_wstrb(device_wstrb),
+    .device_wvalid(device_wvalid),
+    .device_wready(device_wready),
+    .device_bresp(device_bresp),
+    .device_bvalid(device_bvalid),
+    .device_bready(device_bready),
+    //读地址通道
+    .device_araddr(device_araddr),
+    .device_arprot(device_arprot),
+    .device_arvalid(device_arvalid),
+    .device_arready(device_arready),
+    //读数据通道
+    .device_rdata(device_rdata),
+    .device_rresp(device_rresp),
+    .device_rvalid(device_rvalid),
+    .device_rready(device_rready),
+    //slave interface to sram
     .sram_awaddr(sram_awaddr),
     .sram_awprot(sram_awprot),
+    .sram_awvalid(sram_awvalid),
     .sram_awready(sram_awready),
-    //写数据通道
-    .sram_wvalid(sram_wvalid),
     .sram_wdata(sram_wdata),
     .sram_wstrb(sram_wstrb),
+    .sram_wvalid(sram_wvalid),
     .sram_wready(sram_wready),
-    //写响应通道
-    .sram_bvalid(sram_bvalid),
     .sram_bresp(sram_bresp),
-    .sram_bready(sram_bready)
+    .sram_bvalid(sram_bvalid),
+    .sram_bready(sram_bready),
+    //读地址通道
+    .sram_araddr(sram_araddr),
+    .sram_arprot(sram_arprot),
+    .sram_arvalid(sram_arvalid),
+    .sram_arready(sram_arready),
+    //读数据通道
+    .sram_rdata(sram_rdata),
+    .sram_rresp(sram_rresp),
+    .sram_rvalid(sram_rvalid),
+    .sram_rready(sram_rready)
+);
+//uart
+ysyx_25050148_uart #(32,32) pipeline_uart 
+(
+    //slave
+    .clk(clk),
+    .rst(rst_t),
+    //AXI4-lite
+    //读地址通道
+    .arvalid(device_arvalid),
+    .araddr(device_araddr),
+    .arprot(device_arprot),
+    .arready(device_arready),
+    //读数据通道
+    .rvalid(device_rvalid),
+    .rdata(device_rdata),
+    .rresp(device_rresp),
+    .rready(device_rready),
+    //写地址通道
+    .awvalid(device_awvalid),
+    .awaddr(device_awaddr),
+    .awprot(device_awprot),
+    .awready(device_awready),
+    //写数据通道
+    .wvalid(device_wvalid),
+    .wdata(device_wdata),
+    .wstrb(device_wstrb),
+    .wready(device_wready),
+    //写响应通道
+    .bvalid(device_bvalid),
+    .bresp(device_bresp),
+    .bready(device_bready)
 );
 //sram
 ysyx_25050148_sram #(32,32) pipeline_sram(

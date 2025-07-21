@@ -1,6 +1,7 @@
 module ysyx_25050148_exu#(DATA_WIDTH = 32)(
     input clk,
     input rst,
+    input [31:0] instruction,
     input idu_valid,//来自idu的数据有效
     input lsu_ready,//LSU已经准备就绪
     input ifu_valid,//来自IFU的数据有效，此时PC有效
@@ -195,4 +196,19 @@ always@(posedge clk)begin
         exu_alu_out<=exu_alu_out;
     end
 end
+
+//for ftrace
+import "DPI-C" function void trace_func_ret(int pc_now);
+import "DPI-C" function void trace_func_call(int pc_now,int target_addr);
+always@(posedge clk)begin
+    if(pc_jump_flag==0)
+        trace_func_call(current_pc,jal_pc);
+    else if(pc_jump_flag==1 && instruction==32'h00008067)//ret
+        trace_func_ret(current_pc);
+    else if(pc_jump_flag==1 && instruction!=32'h00008067)
+        trace_func_call(current_pc,jalr_pc);
+    else
+        ;
+end
+
 endmodule

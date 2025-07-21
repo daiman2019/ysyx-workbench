@@ -50,31 +50,31 @@ module ysyx_25050148_axi_arbiter #(parameter ADDR_WIDTH=32,DATA_WIDTH=32)(
     output lsu_bvalid,
     output [1:0] lsu_bresp,
     input lsu_bready,
-    //sram slave interface
+    //slave interface
     //读地址通道
-    output sram_arvalid,
-    output [ADDR_WIDTH-1:0] sram_araddr,
-    output sram_arprot,
-    input sram_arready,
+    output s_axi_arvalid,
+    output [ADDR_WIDTH-1:0] s_axi_araddr,
+    output s_axi_arprot,
+    input s_axi_arready,
     //读数据通道
-    input sram_rvalid,
-    input [DATA_WIDTH-1:0] sram_rdata,
-    input [1:0] sram_rresp,
-    output sram_rready,
+    input s_axi_rvalid,
+    input [DATA_WIDTH-1:0] s_axi_rdata,
+    input [1:0] s_axi_rresp,
+    output s_axi_rready,
     //写地址通道
-    output sram_awvalid,
-    output [ADDR_WIDTH-1:0] sram_awaddr,
-    output sram_awprot,
-    input  sram_awready,
+    output s_axi_awvalid,
+    output [ADDR_WIDTH-1:0] s_axi_awaddr,
+    output s_axi_awprot,
+    input  s_axi_awready,
     //写数据通道
-    output sram_wvalid,
-    output [DATA_WIDTH-1:0] sram_wdata,
-    output [(DATA_WIDTH>>3)-1:0] sram_wstrb,
-    input sram_wready,
+    output s_axi_wvalid,
+    output [DATA_WIDTH-1:0] s_axi_wdata,
+    output [(DATA_WIDTH>>3)-1:0] s_axi_wstrb,
+    input s_axi_wready,
     //写响应通道
-    input sram_bvalid,
-    input [1:0] sram_bresp,
-    output sram_bready
+    input s_axi_bvalid,
+    input [1:0] s_axi_bresp,
+    output s_axi_bready
 );
 parameter IDLE=0,IFU_ACTIVE=1,LSU_ACTIVE=2;
 reg [1:0] state,next;
@@ -98,8 +98,8 @@ always@(*)begin
                 next=IDLE;
         end
         IFU_ACTIVE:begin
-            if((is_write && sram_bvalid && sram_bready) || //如果已经完成IFU写
-                (is_read && sram_rvalid && sram_rready)) begin//或者如果已经完成IFU读
+            if((is_write && s_axi_bvalid && s_axi_bready) || //如果已经完成IFU写
+                (is_read && s_axi_rvalid && s_axi_rready)) begin//或者如果已经完成IFU读
                 //检查是否有新请求
                 if(ifu_awvalid || ifu_arvalid)
                     next = IFU_ACTIVE;
@@ -112,8 +112,8 @@ always@(*)begin
                 next = IFU_ACTIVE;
         end
         LSU_ACTIVE:begin
-            if((is_write && sram_bvalid && sram_bready) || //如果已经完成LSU写
-                (is_read && sram_rvalid && sram_rready)) begin//或者如果已经完成LSU读
+            if((is_write && s_axi_bvalid && s_axi_bready) || //如果已经完成LSU写
+                (is_read && s_axi_rvalid && s_axi_rready)) begin//或者如果已经完成LSU读
                 //检查是否有新请求
                 if(ifu_awvalid || ifu_arvalid)
                     next = IFU_ACTIVE;
@@ -161,43 +161,43 @@ always@(posedge clk)begin
     end
 end
 //读地址通道
-assign sram_arvalid = (state == IFU_ACTIVE && is_read)?ifu_arvalid :
+assign s_axi_arvalid = (state == IFU_ACTIVE && is_read)?ifu_arvalid :
                         (state == LSU_ACTIVE && is_read)?lsu_arvalid : 1'b0;
-assign sram_araddr = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_araddr:{ADDR_WIDTH{1'b0}};
-assign sram_arprot = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_arprot:0;
-assign ifu_arready = (state == IFU_ACTIVE && is_read)?sram_arready:1'b0;
-assign lsu_arready = (state == LSU_ACTIVE && is_read)?sram_arready:1'b0;
+assign s_axi_araddr = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_araddr:{ADDR_WIDTH{1'b0}};
+assign s_axi_arprot = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_arprot:0;
+assign ifu_arready = (state == IFU_ACTIVE && is_read)?s_axi_arready:1'b0;
+assign lsu_arready = (state == LSU_ACTIVE && is_read)?s_axi_arready:1'b0;
 //读数据通道
-assign ifu_rvalid = (state == IFU_ACTIVE && is_read)?sram_rvalid:0;
-assign lsu_rvalid = (state == LSU_ACTIVE && is_read)?sram_rvalid:0;
-assign ifu_rdata = sram_rdata;
-assign lsu_rdata = sram_rdata;
-assign ifu_rresp = sram_rresp;
-assign lsu_rresp = sram_rresp;
-assign sram_rready = (state == IFU_ACTIVE && is_read)?ifu_rready:
+assign ifu_rvalid = (state == IFU_ACTIVE && is_read)?s_axi_rvalid:0;
+assign lsu_rvalid = (state == LSU_ACTIVE && is_read)?s_axi_rvalid:0;
+assign ifu_rdata = s_axi_rdata;
+assign lsu_rdata = s_axi_rdata;
+assign ifu_rresp = s_axi_rresp;
+assign lsu_rresp = s_axi_rresp;
+assign s_axi_rready = (state == IFU_ACTIVE && is_read)?ifu_rready:
                         (state == LSU_ACTIVE && is_read)?lsu_rready:1'b0;
 //写地址通道
-assign sram_awvalid = (state == IFU_ACTIVE && is_write)?ifu_awvalid :
+assign s_axi_awvalid = (state == IFU_ACTIVE && is_write)?ifu_awvalid :
                         (state == LSU_ACTIVE && is_write)?lsu_awvalid : 1'b0;
-assign sram_awaddr = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_awaddr:{ADDR_WIDTH{1'b0}};
-assign sram_awprot = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_awprot:0;
-assign ifu_awready = (state == IFU_ACTIVE && is_write)?sram_awready:1'b0;
-assign lsu_awready = (state == LSU_ACTIVE && is_write)?sram_awready:1'b0;
+assign s_axi_awaddr = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_awaddr:{ADDR_WIDTH{1'b0}};
+assign s_axi_awprot = (state == IFU_ACTIVE || state == LSU_ACTIVE)?latched_awprot:0;
+assign ifu_awready = (state == IFU_ACTIVE && is_write)?s_axi_awready:1'b0;
+assign lsu_awready = (state == LSU_ACTIVE && is_write)?s_axi_awready:1'b0;
 //写数据通道
-assign sram_wvalid = (state == IFU_ACTIVE && is_write)?ifu_wvalid :
+assign s_axi_wvalid = (state == IFU_ACTIVE && is_write)?ifu_wvalid :
                         (state == LSU_ACTIVE && is_write)?lsu_wvalid : 1'b0;
-assign sram_wdata = (state == IFU_ACTIVE && ifu_wvalid && is_write)?ifu_wdata:
+assign s_axi_wdata = (state == IFU_ACTIVE && ifu_wvalid && is_write)?ifu_wdata:
                     (state == LSU_ACTIVE && lsu_wvalid && is_write)?lsu_wdata:{DATA_WIDTH{1'b0}};
-assign sram_wstrb = (state == IFU_ACTIVE && ifu_wvalid && is_write)?ifu_wstrb:
+assign s_axi_wstrb = (state == IFU_ACTIVE && ifu_wvalid && is_write)?ifu_wstrb:
                     (state == LSU_ACTIVE && lsu_wvalid && is_write)?lsu_wstrb:{(DATA_WIDTH>>3){1'b0}};
-assign ifu_wready = (state == IFU_ACTIVE && is_write)?sram_wready:1'b0;
-assign lsu_wready = (state == LSU_ACTIVE && is_write)?sram_wready:1'b0;
+assign ifu_wready = (state == IFU_ACTIVE && is_write)?s_axi_wready:1'b0;
+assign lsu_wready = (state == LSU_ACTIVE && is_write)?s_axi_wready:1'b0;
 //写响应通道
-assign ifu_bvalid = (state == IFU_ACTIVE && is_write)?sram_bvalid:1'b0;
-assign lsu_bvalid = (state == LSU_ACTIVE && is_write)?sram_bvalid:1'b0;
-assign ifu_bresp = sram_bresp;
-assign lsu_bresp = sram_bresp;
-assign sram_bready = (state == IFU_ACTIVE && is_write)?ifu_bready:
+assign ifu_bvalid = (state == IFU_ACTIVE && is_write)?s_axi_bvalid:1'b0;
+assign lsu_bvalid = (state == LSU_ACTIVE && is_write)?s_axi_bvalid:1'b0;
+assign ifu_bresp = s_axi_bresp;
+assign lsu_bresp = s_axi_bresp;
+assign s_axi_bready = (state == IFU_ACTIVE && is_write)?ifu_bready:
                         (state == LSU_ACTIVE && is_write)?lsu_bready:1'b0;
 
 endmodule
