@@ -8,7 +8,6 @@ module ysyx_25050148_sram #(ADDR_WIDTH=32,DATA_WIDTH=32)
     input [ADDR_WIDTH-1:0] araddr,
     input arprot,
     output arready,
-
     //读数据通道
     output rvalid,
     output reg [DATA_WIDTH-1:0] rdata,

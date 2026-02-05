@@ -1,4 +1,5 @@
-module ysyx_25050148_xbar (
+module ysyx_25050148_xbar #(parameter UART_ADDR = 32'ha00003f8)
+(
     // 系统信号
     input  wire        clk,
     input  wire        rst,
@@ -193,18 +194,18 @@ module ysyx_25050148_xbar (
     // assign sram_read_select = ((state == READ_ADDR))||(read_active );
 
 
-    assign uart_write_select = ((state == WRITE_ADDR)&&((s_axi_awaddr) == 32'ha00003f8))
-                            || (write_active && ((locked_awaddr) == 32'ha00003f8));
+    assign uart_write_select = ((state == WRITE_ADDR)&&((s_axi_awaddr) == UART_ADDR))
+                            || (write_active && ((locked_awaddr) == UART_ADDR));
                               
-    assign sram_write_select = ((state == WRITE_ADDR)&&((s_axi_awaddr) != 32'ha00003f8))
-                             || (write_active && ((locked_awaddr) != 32'ha00003f8));
+    assign sram_write_select = ((state == WRITE_ADDR)&&((s_axi_awaddr) != UART_ADDR))
+                             || (write_active && ((locked_awaddr) != UART_ADDR));
                               
     //读事务：在握手时使用当前地址，握手后使用锁存地址
-    assign uart_read_select = ((state == READ_ADDR) && ((s_axi_araddr) == 32'ha00003f8))||
-                                (read_active && ((locked_araddr) == 32'ha00003f8));
+    assign uart_read_select = ((state == READ_ADDR) && ((s_axi_araddr) == UART_ADDR))||
+                                (read_active && ((locked_araddr) == UART_ADDR));
                              
-    assign sram_read_select = ((state == READ_ADDR) && ((s_axi_araddr) != 32'ha00003f8))||
-                                (read_active && ((locked_araddr) != 32'ha00003f8));
+    assign sram_read_select = ((state == READ_ADDR) && ((s_axi_araddr) != UART_ADDR))||
+                                (read_active && ((locked_araddr) != UART_ADDR));
     
     // 写地址通道路由
     assign device_awaddr  = s_axi_awaddr;  // 直接使用当前地址，确保握手时地址正确
