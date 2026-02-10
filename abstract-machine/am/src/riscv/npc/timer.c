@@ -1,13 +1,26 @@
 #include <am.h>
 #include <riscv/riscv.h>
+static uint64_t boot_time = 0;
 #define RTC_ADDR        0xa0000048
+
+#define CLINT_MMIO 0x2000000ul
+#define TIME_BASE 0xbff8
+static uint64_t read_time() {
+  uint32_t lo = *(volatile uint32_t *)(CLINT_MMIO + TIME_BASE + 0);
+  uint32_t hi = *(volatile uint32_t *)(CLINT_MMIO + TIME_BASE + 4);
+  uint64_t time = ((uint64_t)hi << 32) | lo;
+  return time;
+}
+
 void __am_timer_init() {
+  boot_time = read_time();
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uint32_t high = inl(RTC_ADDR+4);
+  /*uint32_t high = inl(RTC_ADDR+4);
   uint32_t low = inl(RTC_ADDR);
-  uptime->us = ((uint64_t)high<<32) + (uint64_t)low;
+  uptime->us = ((uint64_t)high<<32) + (uint64_t)low;*/
+  uptime->us = read_time() - boot_time;
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

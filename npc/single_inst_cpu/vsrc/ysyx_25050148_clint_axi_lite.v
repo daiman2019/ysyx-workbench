@@ -1,4 +1,4 @@
-module ysyx_25050148_clint_axi_lite #(ADDR_WIDTH = 32 ,DATA_WIDTH =32,ADDR_MTIME_HI = 32'ha000004c,ADDR_MTIME_LO=32'h0xa0000048)
+module ysyx_25050148_clint_axi_lite #(ADDR_WIDTH = 32 ,DATA_WIDTH =32,ADDR_MTIME_HI = 32'ha000004c,ADDR_MTIME_LO=32'ha0000048)
 (
     input clk,
     input rst,
@@ -29,25 +29,82 @@ module ysyx_25050148_clint_axi_lite #(ADDR_WIDTH = 32 ,DATA_WIDTH =32,ADDR_MTIME
     input s_axi_bready
 );
 reg [63:0] mtime;
-wire ar_handshake;
-wire r_handshake;
-
+reg [31:0] latched_addr;
+reg state,next;
+parameter IDLE=0,READ_ADDR=1,READ_DATA=2;
 always@(posedge clk) begin
     if(rst)
         mtime<=64'h0;
     else
         mtime<=mtime+64'h1;
 end
+//写通道全部置为0
 assign s_axi_awready = 1'b0;
 assign s_axi_wready = 1'b0;
 assign s_axi_bvalid = 1'b0;
 assign s_axi_bresp = 2'b0;
 
-assign ar_handshake = s_axi_arvalid && s_axi_arready;
-assign r_handshake = s_axi_rvalid && s_axi_rready;
-
-always@(posdege clk)begin
+always@(posedge clk)begin
     if(rst)
+        state<=IDLE;
+    else
+        state<=next;
+end
+
+always @(*) begin
+    case(state)
+        IDLE:begin
+            if(s_axi_arvalid)
+                next=READ_ADDR;
+            else
+                next=IDLE;
+        end
+        READ_ADDR:begin
+            if(s_axi_arvalid&s_axi_rready)
+                next=READ_DATA;
+            else
+                next=READ_ADDR;
+        end
+        READ_DATA:begin
+            if(s_axi_rready&s_axi_rvalid)
+                if(s_axi_arvalid)
+                    next=READ_ADDR;
+                else
+                    next=IDLE;
+            else
+                next=READ_DATA;
+        end
+    endcase
+end
+always @(posedge clk) begin
+    if(rst) 
+        latched_addr<=0;
+    else if(s_axi_arready&s_axi_arvalid)
+        latched_addr<=s_axi_araddr;
+    else
+        latched_addr<=latched_addr;
+end
+assign s_axi_arready = (state==READ_ADDR);
+assign s_axi_rvalid = (state==READ_DATA);
+always@(*)begin
+    if(state==READ_DATA) begin
+        if(latched_addr == ADDR_MTIME_HI) begin
+            s_axi_rdata = mtime[63:32];
+            s_axi_rresp = 2'b00;
+        end
+        else if(latched_addr == ADDR_MTIME_LO) begin
+            s_axi_rdata = mtime[31:0];
+            s_axi_rresp = 2'b00;
+        end
+        else begin
+            s_axi_rdata = 32'h0;
+            s_axi_rresp = 2'b01;
+        end
+    end
+    else begin
+        s_axi_rdata = 32'h0;
+        s_axi_rresp = 2'b01;
+    end
 end
 
 endmodule
